@@ -1,6 +1,9 @@
+#README
+
 #分支（branch）说明
 * master - 正式发布版本，暂时不要提交到该分支
 * dev - 开发分支，请提交到该分支
+
 #提交说明
 * 每位开发者在本地建立local分支
 * 将github的dev分支更新（pull）到本地的local分支
