@@ -1,0 +1,57 @@
+package com.infinity.utils;
+
+import java.util.List;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
+
+public class HttpRequest {
+	
+	public static final int HTTP_OK = 1;
+	public static final int HTTP_FAILED = 0;
+	
+	public static final class Response
+	{
+		public String str;
+	}
+	
+	public static final int get(String url, HttpRequest.Response response) {
+		HttpGet request = new HttpGet(url);
+		
+		try {
+			HttpResponse httpResponse = new DefaultHttpClient().execute(request);
+			if (httpResponse.getStatusLine().getStatusCode() != 200)
+				return HTTP_FAILED;
+			response.str = EntityUtils.toString(httpResponse.getEntity());
+			
+		} catch (Exception e) {
+			return HTTP_FAILED;
+		}
+		return HTTP_OK;
+	}
+	
+	public static final int post(String url, List<NameValuePair> postFields, HttpRequest.Response response)
+	{
+		HttpPost request = new HttpPost(url);
+		request.setEntity(new UrlEncodedFormEntity(postFields,HTTP.UTF_8));
+		
+		try {
+			HttpResponse httpResponse = new DefaultHttpClient().execute(request);
+			if (httpResponse.getStatusLine().getStatusCode() != 200)
+				return HTTP_FAILED;
+			response.str = EntityUtils.toString(httpResponse.getEntity());
+			
+		} catch (Exception e) {
+			return HTTP_FAILED;
+		}		
+		
+		return HTTP_OK;
+	}
+
+}

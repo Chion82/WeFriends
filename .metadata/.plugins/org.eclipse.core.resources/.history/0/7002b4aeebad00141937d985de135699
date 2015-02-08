@@ -1,0 +1,33 @@
+package com.infinity.utils;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+
+public class HttpRequest {
+	
+	public static final int HTTP_OK = 1;
+	public static final int HTTP_FAILED = 0;
+	
+	public static final class Response
+	{
+		public String str;
+	}
+	
+	public static final int get(String url, HttpRequest.Response response) {
+		HttpGet request = new HttpGet(url);
+		
+		try {
+			HttpResponse httpResponse = new DefaultHttpClient().execute(request);
+			if (httpResponse.getStatusLine().getStatusCode() != 200)
+				return HTTP_FAILED;
+			response.str = EntityUtils.toString(httpResponse.getEntity());
+			
+		} catch (Exception e) {
+			return HTTP_FAILED;
+		}
+		return HTTP_OK;
+	}
+
+}

@@ -1,0 +1,74 @@
+
+<ViewFlipper xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/myViewFlipper"
+    android:layout_width="fill_parent" 
+    android:layout_height="fill_parent" >
+    
+    <android.support.v4.widget.DrawerLayout android:id="@+id/myDrawerLayout">
+		<RelativeLayout
+		    android:id="@+id/mainlayout"
+		    android:layout_width="fill_parent"
+		    android:layout_height="fill_parent"
+		    android:background="#DDDDDD"
+		
+		    tools:context="com.example.hello.MainActivity" >
+		
+		    <TextView
+		        android:id="@+id/myTextView"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="@string/hello_world" />
+		
+		    <Button
+		        android:id="@+id/myButton"
+		        style="@style/CustomedButton"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_alignLeft="@+id/myTextView"
+		        android:layout_below="@+id/myTextView"
+		        android:layout_marginTop="26dp" />
+		
+		
+		    <ScrollView
+		        android:id="@+id/scrollView1"
+		        android:layout_width="200dp"
+		        android:layout_height="150dp"
+		        android:layout_alignParentLeft="true"
+		        android:layout_alignParentBottom="true" >
+		
+		        <LinearLayout
+		            android:id="@+id/myLayout"
+		            android:layout_width="match_parent"
+		            android:layout_height="wrap_content"
+		            android:orientation="vertical" >
+		        </LinearLayout>
+		    
+		    </ScrollView>
+		
+		    <Button
+		        android:layout_width="50dp"
+		        android:layout_height="50dp"
+		        android:layout_alignParentBottom="true"
+		        android:layout_alignParentRight="true" 
+		        android:background="#565656"
+		        android:id="@+id/statusButton"
+		        />
+		
+		</RelativeLayout>
+		
+		<TextView
+		    android:id="@+id/left_text_view"
+		    android:layout_width="250dp"
+		    android:layout_height="match_parent" 
+		    android:text="HIHIHIHIHIHI" />
+		
+	</android.support.v4.widget.DrawerLayout>
+	
+	<LinearLayout
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent" 
+	    android:background="#565656" >
+	    
+	</LinearLayout>
+</ViewFlipper>

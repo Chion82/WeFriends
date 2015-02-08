@@ -1,0 +1,30 @@
+package com.example.hello;
+
+import android.content.Context;
+import android.util.AttributeSet;
+import android.view.LayoutInflater;
+import android.widget.LinearLayout;
+
+public class ListItemWidget extends LinearLayout {
+	
+	protected Context m_context = null;
+
+	public ListItemWidget(Context context) {
+		super(context);
+		m_context = context;
+		createView();
+	}
+	
+	public ListItemWidget(Context context, AttributeSet attrs)
+	{
+		super(context,attrs);
+		m_context = context;
+		createView();
+	}
+	
+	protected void createView()
+	{
+		LayoutInflater.from(m_context).inflate(R.layout.listwidget, this, true);
+	}
+
+}

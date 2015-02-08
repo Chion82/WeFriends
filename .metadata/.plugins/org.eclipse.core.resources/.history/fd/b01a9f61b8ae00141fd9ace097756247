@@ -1,0 +1,78 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.wefriends.MainActivity"
+    android:background="#DDDDDD" >
+
+    <TextView
+        android:id="@+id/main_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/hello_world" />
+    
+    <RadioButton         
+        android:layout_width="match_parent" 
+        android:layout_height="60dp"
+        android:text="fasdfasdf"
+        android:paddingLeft="-30dp"  />
+    
+    <RadioGroup
+        android:id="@+id/nav_bar_group"
+        android:layout_width="match_parent" 
+        android:layout_height="60dp"
+        android:background="#FFFFFF"
+        android:layout_alignParentBottom="true" 
+        android:orientation="horizontal">   
+        
+        
+        <RadioButton
+            android:id="@+id/nav_bar_chats"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/nav_bar_chats"
+            android:drawableTop="@drawable/nav_bar_chats_drawable"
+            android:textColor="#999999"
+            android:gravity="center_horizontal"
+            android:layout_weight="1"
+            android:paddingLeft="-20dp" />
+        
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/nav_bar_chats"
+            android:button="@null"
+            android:drawableTop="@drawable/nav_bar_chats_drawable"
+            android:textColor="#999999"
+            android:gravity="center_horizontal"
+            android:layout_weight="1" />
+        
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/nav_bar_chats"
+            android:button="@null"
+            android:drawableTop="@drawable/nav_bar_chats_drawable"
+            android:textColor="#999999"
+            android:gravity="center_horizontal"
+            android:layout_weight="1" />
+        
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/nav_bar_chats"
+            android:button="@null"
+            android:drawableTop="@drawable/nav_bar_chats_drawable"
+            android:textColor="#999999"
+            android:gravity="center_horizontal"
+            android:layout_weight="1" />
+        
+   	</RadioGroup>
+   	
+    
+    <View android:layout_width="match_parent"
+    	android:layout_height="1dp"
+    	android:background="#999999"
+    	android:layout_above="@id/nav_bar_group" />
+
+</RelativeLayout>

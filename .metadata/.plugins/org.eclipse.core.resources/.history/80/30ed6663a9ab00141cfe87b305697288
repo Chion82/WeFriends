@@ -1,0 +1,45 @@
+package com.example.hello;
+
+import android.content.Context;
+import android.util.AttributeSet;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+public class CustomedView extends LinearLayout{
+	
+	protected TextView textView = null;
+	protected String showText = "";
+	Context m_context;
+	
+	/*public CustomedView(Context context)
+	{
+		super(context);
+		m_context = context;
+	}*/
+	
+	public CustomedView(Context context, AttributeSet attrs)
+	{
+		super(context,attrs);
+		m_context = context;
+		
+		LayoutInflater.from(context).inflate(R.layout.customedview, this, true);
+		
+		textView = (TextView)findViewById(R.id.customedtextview);
+		
+		textView.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Toast.makeText(m_context, showText, Toast.LENGTH_SHORT).show();
+			}
+		});
+	}
+	
+	public void Init(String text)
+	{
+		showText = text;
+	}
+
+}

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" 
+    xmlns:WeFriends="http://schemas.android.com/apk/res-auto" >
+    <item android:id="@+id/action_bar_search"
+        android:title=""
+        android:icon="@drawable/ic_action_search" 
+        WeFriends:showAsAction="ifRoom"/>
+    
+    <item android:id="@+id/action_bar_add"
+        android:title=""
+        android:icon="@drawable/ic_action_new" 
+        WeFriends:showAsAction="ifRoom">
+        <menu>
+            <item android:id="@+id/action_add_friend_button"
+                android:title="@string/action_add_friend" />
+        </menu>    
+    </item>
+    
+</menu>
