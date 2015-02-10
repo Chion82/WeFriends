@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.AttributeSet;
@@ -179,6 +180,7 @@ public class MainActivity extends Activity {
 		
 		menu.add(0, 0, 0, "Quit");
 		menu.add(0,1,1,"TestGPS");
+		menu.add(0,2,2,"TestProvider");
 		
 		return super.onCreateOptionsMenu(menu);
 	}
@@ -192,6 +194,9 @@ public class MainActivity extends Activity {
 		{
 			LocationManager manager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
 			manager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,0,0,new myLocationListener());
+		}
+		else if (item.getItemId()==2) {
+			getContentResolver().query(Uri.parse("content://com.test.myprovider/getData"), new String[]{}, "", new String[]{}, "");
 		}
 		
 		return super.onOptionsItemSelected(item);

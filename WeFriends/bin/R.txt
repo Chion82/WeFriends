@@ -333,7 +333,7 @@ int drawable abc_textfield_default_mtrl_alpha 0x7f02002f
 int drawable abc_textfield_search_activated_mtrl_alpha 0x7f020030
 int drawable abc_textfield_search_default_mtrl_alpha 0x7f020031
 int drawable abc_textfield_search_material 0x7f020032
-int drawable actionBarDrawable 0x7f020054
+int drawable actionBarDrawable 0x7f020055
 int drawable chats_normal 0x7f020033
 int drawable chats_selected 0x7f020034
 int drawable contacts_normal 0x7f020035
@@ -367,13 +367,14 @@ int drawable ic_action_video 0x7f020050
 int drawable ic_launcher 0x7f020051
 int drawable me_normal 0x7f020052
 int drawable me_selected 0x7f020053
-int id action_add_friend_button 0x7f090045
+int drawable nav_bar_button_notification_background 0x7f020054
+int id action_add_friend_button 0x7f090046
 int id action_bar 0x7f090031
 int id action_bar_activity_content 0x7f090003
 int id action_bar_container 0x7f090030
-int id action_bar_overflow 0x7f090044
+int id action_bar_overflow 0x7f090045
 int id action_bar_root 0x7f09002c
-int id action_bar_search 0x7f090043
+int id action_bar_search 0x7f090044
 int id action_bar_spinner 0x7f090002
 int id action_bar_subtitle 0x7f09001f
 int id action_bar_title 0x7f09001e
@@ -383,7 +384,7 @@ int id action_menu_presenter 0x7f090006
 int id action_mode_bar 0x7f09002e
 int id action_mode_bar_stub 0x7f09002d
 int id action_mode_close_button 0x7f090020
-int id action_settings 0x7f090046
+int id action_settings 0x7f090047
 int id activity_chooser_view_content 0x7f090021
 int id always 0x7f090014
 int id beginning 0x7f09001b
@@ -407,8 +408,9 @@ int id listMode 0x7f09000a
 int id list_item 0x7f090025
 int id main_text_view 0x7f09003f
 int id middle 0x7f09001d
-int id nav_bar_button_image 0x7f090041
-int id nav_bar_button_text 0x7f090042
+int id nav_bar_button_image 0x7f090042
+int id nav_bar_button_notification 0x7f090041
+int id nav_bar_button_text 0x7f090043
 int id nav_bar_group 0x7f090040
 int id never 0x7f090017
 int id none 0x7f09000f
