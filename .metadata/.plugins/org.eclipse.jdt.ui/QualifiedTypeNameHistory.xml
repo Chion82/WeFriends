@@ -1,15 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-<fullyQualifiedTypeName name="com.example.hello.R.drawable"/>
-<fullyQualifiedTypeName name="android.widget.SimpleAdapter"/>
-<fullyQualifiedTypeName name="java.util.HashMap"/>
-<fullyQualifiedTypeName name="android.widget.AdapterView.OnItemClickListener"/>
-<fullyQualifiedTypeName name="org.apache.http.client.methods.HttpGet"/>
-<fullyQualifiedTypeName name="org.apache.http.HttpResponse"/>
-<fullyQualifiedTypeName name="org.apache.http.impl.client.DefaultHttpClient"/>
-<fullyQualifiedTypeName name="org.apache.http.util.EntityUtils"/>
-<fullyQualifiedTypeName name="org.apache.http.HttpEntity"/>
-<fullyQualifiedTypeName name="com.infinity.utils.HttpRequest.Response"/>
 <fullyQualifiedTypeName name="java.util.Map"/>
 <fullyQualifiedTypeName name="org.apache.http.client.methods.HttpPost"/>
 <fullyQualifiedTypeName name="org.apache.http.protocol.HTTP"/>
@@ -21,7 +11,6 @@
 <fullyQualifiedTypeName name="java.io.FileOutputStream"/>
 <fullyQualifiedTypeName name="android.os.Environment"/>
 <fullyQualifiedTypeName name="android.location.LocationManager"/>
-<fullyQualifiedTypeName name="android.content.Context"/>
 <fullyQualifiedTypeName name="android.location.LocationListener"/>
 <fullyQualifiedTypeName name="com.example.hello.R.id"/>
 <fullyQualifiedTypeName name="android.provider.Settings"/>
@@ -29,7 +18,6 @@
 <fullyQualifiedTypeName name="com.infinity.wefriends.R.layout"/>
 <fullyQualifiedTypeName name="android.widget.ImageView"/>
 <fullyQualifiedTypeName name="android.widget.TextView"/>
-<fullyQualifiedTypeName name="com.infinity.wefriends.R.string"/>
 <fullyQualifiedTypeName name="com.infinity.wefriends.R.drawable"/>
 <fullyQualifiedTypeName name="android.graphics.Color"/>
 <fullyQualifiedTypeName name="android.view.View"/>
@@ -43,7 +31,6 @@
 <fullyQualifiedTypeName name="android.content.ContentProvider"/>
 <fullyQualifiedTypeName name="org.apache.http.client.entity.UrlEncodedFormEntity"/>
 <fullyQualifiedTypeName name="android.net.Uri"/>
-<fullyQualifiedTypeName name="org.json.JSONObject"/>
 <fullyQualifiedTypeName name="android.content.BroadcastReceiver"/>
 <fullyQualifiedTypeName name="android.content.IntentFilter"/>
 <fullyQualifiedTypeName name="android.content.Intent"/>
@@ -60,4 +47,17 @@
 <fullyQualifiedTypeName name="android.content.ServiceConnection"/>
 <fullyQualifiedTypeName name="com.example.androidtest.MyService.MyBinder"/>
 <fullyQualifiedTypeName name="android.os.Parcel"/>
+<fullyQualifiedTypeName name="android.database.sqlite.SQLiteOpenHelper"/>
+<fullyQualifiedTypeName name="com.infinity.wefriends.DataBaseHelper"/>
+<fullyQualifiedTypeName name="android.content.Context"/>
+<fullyQualifiedTypeName name="android.database.sqlite.SQLiteCursor"/>
+<fullyQualifiedTypeName name="android.database.Cursor"/>
+<fullyQualifiedTypeName name="com.infinity.utils.HttpRequest.Response"/>
+<fullyQualifiedTypeName name="com.infinity.wefriends.R"/>
+<fullyQualifiedTypeName name="org.json.JSONObject"/>
+<fullyQualifiedTypeName name="com.infinity.wefriends.R.string"/>
+<fullyQualifiedTypeName name="com.infinity.wefriends.apis.Users"/>
+<fullyQualifiedTypeName name="android.database.sqlite.SQLiteDatabase"/>
+<fullyQualifiedTypeName name="com.infinity.wefriends.apis.DataBaseHelper"/>
+<fullyQualifiedTypeName name="android.content.ContentValues"/>
 </qualifiedTypeNameHistroy>

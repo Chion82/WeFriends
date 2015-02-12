@@ -1856,16 +1856,19 @@ containing a value of this type.
         /**  Content description for the Toolbar icon used to collapse an expanded action mode. [CHAR LIMIT=NONE] 
          */
         public static final int abc_toolbar_collapse_description=0x7f0a0004;
-        public static final int action_add_friend=0x7f0a0015;
-        public static final int action_overflow=0x7f0a0014;
-        public static final int action_search=0x7f0a0013;
-        public static final int action_settings=0x7f0a0012;
-        public static final int app_name=0x7f0a0010;
-        public static final int hello_world=0x7f0a0011;
-        public static final int nav_bar_chats=0x7f0a0016;
-        public static final int nav_bar_contacts=0x7f0a0017;
-        public static final int nav_bar_discovery=0x7f0a0018;
-        public static final int nav_bar_me=0x7f0a0019;
+        public static final int action_add_friend=0x7f0a0018;
+        public static final int action_overflow=0x7f0a0017;
+        public static final int action_search=0x7f0a0016;
+        public static final int action_settings=0x7f0a0015;
+        public static final int app_name=0x7f0a0013;
+        public static final int hello_world=0x7f0a0014;
+        public static final int nav_bar_chats=0x7f0a0019;
+        public static final int nav_bar_contacts=0x7f0a001a;
+        public static final int nav_bar_discovery=0x7f0a001b;
+        public static final int nav_bar_me=0x7f0a001c;
+        public static final int server_host=0x7f0a0010;
+        public static final int server_notification_port=0x7f0a0012;
+        public static final int server_web_service_port=0x7f0a0011;
     }
     public static final class style {
         public static final int ActionBarBackgroundStyle=0x7f0b00ee;

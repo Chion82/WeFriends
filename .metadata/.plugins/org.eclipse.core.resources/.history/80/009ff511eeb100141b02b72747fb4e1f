@@ -1,0 +1,32 @@
+package com.infinity.wefriends;
+
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteDatabase.CursorFactory;
+import android.database.sqlite.SQLiteOpenHelper;
+
+public class DataBaseHelper extends SQLiteOpenHelper {
+	
+	public DataBaseHelper(Context context, String dataBaseName) {
+		this(context, dataBaseName, null, 1);
+	}
+
+	public DataBaseHelper(Context context, String name, CursorFactory factory,
+			int version) {
+		super(context, name, factory, version);
+		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	public void onCreate(SQLiteDatabase db) {
+		db.execSQL("CREATE TABLE users(_id INTEGER PRIMARY KEY AUTOINCREMENT, accesstoken TEXT, wefriendsid TEXT, nickname TEXT, avatar TEXT, whatsup TEXT, friends TEXT)");
+		
+	}
+
+	@Override
+	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		// TODO Auto-generated method stub
+		
+	}
+
+}

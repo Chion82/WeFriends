@@ -19,7 +19,13 @@ public class HttpRequest {
 	public static final int HTTP_FAILED = 0;
 	
 	public static final class Response {
-		public String str;
+		protected String str;
+		public void setString(String string) {
+			str = string;
+		}
+		public String getString() {
+			return str;
+		}
 	}
 	
 	public static final int get(String url, HttpRequest.Response response) {
@@ -29,7 +35,7 @@ public class HttpRequest {
 			HttpResponse httpResponse = new DefaultHttpClient().execute(request);
 			if (httpResponse.getStatusLine().getStatusCode() != 200)
 				return HTTP_FAILED;
-			response.str = EntityUtils.toString(httpResponse.getEntity());
+			response.setString(EntityUtils.toString(httpResponse.getEntity()));
 			
 		} catch (Exception e) {
 			Log.e("WeFriends",e.getMessage());
@@ -46,7 +52,7 @@ public class HttpRequest {
 			HttpResponse httpResponse = new DefaultHttpClient().execute(request);
 			if (httpResponse.getStatusLine().getStatusCode() != 200)
 				return HTTP_FAILED;
-			response.str = EntityUtils.toString(httpResponse.getEntity());
+			response.setString(EntityUtils.toString(httpResponse.getEntity()));
 			
 		} catch (Exception e) {
 			Log.e("WeFriends",e.getMessage());

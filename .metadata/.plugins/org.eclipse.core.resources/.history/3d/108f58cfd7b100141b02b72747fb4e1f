@@ -1,0 +1,16 @@
+package com.infinity.wefriends.operations;
+
+import com.infinity.utils.*;
+import com.infinity.wefriends.DataBaseHelper;
+
+public class Users {
+	protected DataBaseHelper dataBase = null;
+	
+	public Users(Context context) {
+		dataBase = new DataBaseHelper(context,"cache");
+	}
+	
+	public boolean autoValidateAccessToken() {
+		 
+	}
+}
