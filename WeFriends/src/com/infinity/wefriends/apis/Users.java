@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.infinity.utils.*;
+import com.infinity.wefriends.MainActivity;
 import com.infinity.wefriends.R;
 import com.infinity.wefriends.apis.DataBaseHelper;
 
@@ -24,16 +25,16 @@ public class Users {
 		database = new DataBaseHelper(context,"wefriendsdb");
 	}
 	
-	public int validateCachedAccessToken() {
+	public int authenticateCachedAccessToken() {
 		SQLiteDatabase db = database.getReadableDatabase();
 		Cursor cursor = db.query("usercache", new String[]{"accesstoken"}, "", new String[]{}, "", "", "", "1");
 		if (!cursor.moveToNext())
 			return TOKEN_INVALID;
 		String accessToken = cursor.getString(cursor.getColumnIndex("accesstoken"));
-		return validateAccessToken(accessToken);
+		return authenticateAccessToken(accessToken);
 	}
 	
-	public int validateAccessToken(String accessToken) {
+	public int authenticateAccessToken(String accessToken) {
 		HttpRequest.Response response = new HttpRequest.Response();
 		String requestURL = "http://" + m_context.getString(R.string.server_host) + ":" + m_context.getString(R.string.server_web_service_port) + "/users/getuserinfobytoken?accesstoken=" + accessToken;
 		if(HttpRequest.get(requestURL,response) == HttpRequest.HTTP_FAILED)
@@ -51,4 +52,5 @@ public class Users {
 		}
 		return CONNECTION_ERROR;
 	}
+	
 }

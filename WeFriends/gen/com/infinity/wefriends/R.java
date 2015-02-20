@@ -1669,13 +1669,13 @@ containing a value of this type.
         public static final int nav_bar_button_notification_background=0x7f020054;
     }
     public static final class id {
-        public static final int action_add_friend_button=0x7f090046;
+        public static final int action_add_friend_button=0x7f090048;
         public static final int action_bar=0x7f090031;
         public static final int action_bar_activity_content=0x7f090003;
         public static final int action_bar_container=0x7f090030;
-        public static final int action_bar_overflow=0x7f090045;
+        public static final int action_bar_overflow=0x7f090047;
         public static final int action_bar_root=0x7f09002c;
-        public static final int action_bar_search=0x7f090044;
+        public static final int action_bar_search=0x7f090046;
         public static final int action_bar_spinner=0x7f090002;
         public static final int action_bar_subtitle=0x7f09001f;
         public static final int action_bar_title=0x7f09001e;
@@ -1685,7 +1685,7 @@ containing a value of this type.
         public static final int action_mode_bar=0x7f09002e;
         public static final int action_mode_bar_stub=0x7f09002d;
         public static final int action_mode_close_button=0x7f090020;
-        public static final int action_settings=0x7f090047;
+        public static final int action_settings=0x7f090049;
         public static final int activity_chooser_view_content=0x7f090021;
         public static final int always=0x7f090014;
         public static final int beginning=0x7f09001b;
@@ -1707,12 +1707,14 @@ containing a value of this type.
         public static final int image=0x7f090023;
         public static final int listMode=0x7f09000a;
         public static final int list_item=0x7f090025;
-        public static final int main_text_view=0x7f09003f;
+        public static final int loginwindow_password_edit=0x7f090040;
+        public static final int loginwindow_username_edit=0x7f09003f;
+        public static final int main_text_view=0x7f090041;
         public static final int middle=0x7f09001d;
-        public static final int nav_bar_button_image=0x7f090042;
-        public static final int nav_bar_button_notification=0x7f090041;
-        public static final int nav_bar_button_text=0x7f090043;
-        public static final int nav_bar_group=0x7f090040;
+        public static final int nav_bar_button_image=0x7f090044;
+        public static final int nav_bar_button_notification=0x7f090043;
+        public static final int nav_bar_button_text=0x7f090045;
+        public static final int nav_bar_group=0x7f090042;
         public static final int never=0x7f090017;
         public static final int none=0x7f09000f;
         public static final int normal=0x7f09000b;
@@ -1791,9 +1793,10 @@ containing a value of this type.
         public static final int abc_search_dropdown_item_icons_2line=0x7f030014;
         public static final int abc_search_view=0x7f030015;
         public static final int abc_simple_dropdown_hint=0x7f030016;
-        public static final int activity_main=0x7f030017;
-        public static final int nav_bar_button=0x7f030018;
-        public static final int support_simple_spinner_dropdown_item=0x7f030019;
+        public static final int activity_login=0x7f030017;
+        public static final int activity_main=0x7f030018;
+        public static final int nav_bar_button=0x7f030019;
+        public static final int support_simple_spinner_dropdown_item=0x7f03001a;
     }
     public static final class menu {
         public static final int actionbar=0x7f0c0000;
@@ -1856,16 +1859,19 @@ containing a value of this type.
         /**  Content description for the Toolbar icon used to collapse an expanded action mode. [CHAR LIMIT=NONE] 
          */
         public static final int abc_toolbar_collapse_description=0x7f0a0004;
-        public static final int action_add_friend=0x7f0a0018;
-        public static final int action_overflow=0x7f0a0017;
-        public static final int action_search=0x7f0a0016;
+        public static final int action_add_friend=0x7f0a001b;
+        public static final int action_overflow=0x7f0a001a;
+        public static final int action_search=0x7f0a0019;
         public static final int action_settings=0x7f0a0015;
         public static final int app_name=0x7f0a0013;
         public static final int hello_world=0x7f0a0014;
-        public static final int nav_bar_chats=0x7f0a0019;
-        public static final int nav_bar_contacts=0x7f0a001a;
-        public static final int nav_bar_discovery=0x7f0a001b;
-        public static final int nav_bar_me=0x7f0a001c;
+        public static final int login=0x7f0a0016;
+        public static final int nav_bar_chats=0x7f0a001c;
+        public static final int nav_bar_contacts=0x7f0a001d;
+        public static final int nav_bar_discovery=0x7f0a001e;
+        public static final int nav_bar_me=0x7f0a001f;
+        public static final int password=0x7f0a0018;
+        public static final int phone_number=0x7f0a0017;
         public static final int server_host=0x7f0a0010;
         public static final int server_notification_port=0x7f0a0012;
         public static final int server_web_service_port=0x7f0a0011;

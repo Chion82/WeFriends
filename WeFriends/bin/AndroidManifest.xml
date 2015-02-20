@@ -26,6 +26,12 @@
             </intent-filter>
         </activity>
         
+        <activity 
+            android:name=".LoginActivity"
+            android:label="@string/login"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        </activity>
+        
     </application>
     
 </manifest>

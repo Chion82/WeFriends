@@ -32,6 +32,8 @@ public class MainActivity extends ActionBarActivity {
 	protected NavBarButton navBarDiscovery = null;
 	protected NavBarButton navBarMe = null;
 	
+	protected AsyncConnTask asyncTask = null;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -39,16 +41,15 @@ public class MainActivity extends ActionBarActivity {
 		
 		initNavBar();
 		
-		Users usersAPI = new Users(this);
-		int result = usersAPI.validateCachedAccessToken();
-		if (result==Users.TOKEN_VALID)
-			Log.d("test","Token valid.");
-		else if (result==Users.TOKEN_INVALID)
-			Log.d("test","Token invalid.");
-		else if (result==Users.CONNECTION_ERROR)
-			Log.d("test","Connection error.");
+		asyncTask = new AsyncConnTask(this);
+		asyncTask.initCheckUserInfo();
 
 	}
+	
+	public void loadAllData() {
+		Log.d("WeFriends","Loading All Data.");
+	}
+	
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
