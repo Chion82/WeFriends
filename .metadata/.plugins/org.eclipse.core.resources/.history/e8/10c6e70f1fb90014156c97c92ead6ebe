@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <drawable name="actionBarDrawable">#6FA8DC</drawable>
+    <drawable name="lightBlue">#6FA8DC</drawable>
+    <drawable name="darkBlue">#000000</drawable>
+</resources>

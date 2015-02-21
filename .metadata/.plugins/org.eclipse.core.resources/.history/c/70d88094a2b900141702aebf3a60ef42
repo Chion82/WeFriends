@@ -1,0 +1,78 @@
+package com.infinity.wefriends;
+
+import com.infinity.wefriends.apis.Users;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Looper;
+import android.widget.Button;
+import android.widget.Toast;
+
+public class AsyncConnTask {
+	Users users = null;
+	Context m_context = null;
+	
+	public AsyncConnTask(Context context) {
+		m_context = context;
+		users = new Users(context);
+	}
+	
+	public void initCheckUserInfo() {
+		Thread thread = new InitUserCheckThread();
+		thread.start();
+	}
+	
+	protected class InitUserCheckThread extends Thread {
+		@Override
+		public void run() {
+			if (users.authenticateCachedAccessToken()==Users.TOKEN_INVALID) {
+				Intent intent = new Intent();
+				intent.setClass(AsyncConnTask.this.m_context,LoginActivity.class);
+				AsyncConnTask.this.m_context.startActivity(intent);
+				((MainActivity)AsyncConnTask.this.m_context).finish();
+			} else {
+				((MainActivity)AsyncConnTask.this.m_context).loadAllData();
+			}
+			super.run();
+		}
+	}
+	
+	public void login(String phone, String password) {
+		LoginThread loginThread = new LoginThread(phone,password);
+		loginThread.start();
+	}
+	
+	protected class LoginThread extends Thread {
+		protected String m_phone,m_password;
+		public LoginThread(String phone, String password) {
+			m_phone = phone;
+			m_password = password;
+		}
+		@Override
+		public void run() {
+			int result = users.login(m_phone, m_password);
+			switch(result) {
+			case Users.LOGIN_OK:
+				Intent intent = new Intent();
+				intent.setClass(m_context, MainActivity.class);
+				m_context.startActivity(intent);
+				((Activity)m_context).finish();
+				break;
+			case Users.LOGIN_FAILED:
+				Looper.prepare();
+				((LoginActivity)m_context).handler.sendEmptyMessage(LoginActivity.LOGIN_FAILED);
+				Looper.loop();
+				break;
+			case Users.CONNECTION_ERROR:
+				Looper.prepare();
+				((LoginActivity)m_context).handler.sendEmptyMessage(LoginActivity.CONNECTION_ERROR);
+				Looper.loop();
+				break;
+			}
+			super.run();
+		}
+		
+	}
+
+}

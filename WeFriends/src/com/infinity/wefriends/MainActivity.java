@@ -12,6 +12,8 @@ import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
@@ -24,6 +26,8 @@ import com.infinity.wefriends.apis.DataBaseHelper;
 import com.infinity.wefriends.apis.Users;
 
 public class MainActivity extends ActionBarActivity {
+	
+	public static final int MAIN_LOADALLDATA = 100;
 
 	public int currentPage = NavBarButton.CHATS;
 	
@@ -32,7 +36,9 @@ public class MainActivity extends ActionBarActivity {
 	protected NavBarButton navBarDiscovery = null;
 	protected NavBarButton navBarMe = null;
 	
-	protected AsyncConnTask asyncTask = null;
+	protected MainAsyncTask asyncTask = null;
+	
+	public MainActivityHandler handler = new MainActivityHandler();
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +47,7 @@ public class MainActivity extends ActionBarActivity {
 		
 		initNavBar();
 		
-		asyncTask = new AsyncConnTask(this);
+		asyncTask = new MainAsyncTask(this);
 		asyncTask.initCheckUserInfo();
 
 	}
@@ -95,5 +101,19 @@ public class MainActivity extends ActionBarActivity {
 		navBarContacts.setGravity(Gravity.CENTER_HORIZONTAL);
 		navBarDiscovery.setGravity(Gravity.CENTER_HORIZONTAL);
 		navBarMe.setGravity(Gravity.CENTER_HORIZONTAL);
+	}
+	
+	protected class MainActivityHandler extends Handler {
+
+		@Override
+		public void handleMessage(Message msg) {
+			switch(msg.what) {
+			case MAIN_LOADALLDATA:
+				loadAllData();
+				break;
+			}
+			super.handleMessage(msg);
+		}
+		
 	}
 }
