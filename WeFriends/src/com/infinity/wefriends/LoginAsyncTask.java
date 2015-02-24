@@ -37,14 +37,10 @@ public class LoginAsyncTask {
 				((Activity)m_context).finish();
 				break;
 			case Users.LOGIN_FAILED:
-				Looper.prepare();
 				((LoginActivity)m_context).handler.sendEmptyMessage(LoginActivity.LOGIN_FAILED);
-				Looper.loop();
 				break;
 			case Users.CONNECTION_ERROR:
-				Looper.prepare();
 				((LoginActivity)m_context).handler.sendEmptyMessage(LoginActivity.CONNECTION_ERROR);
-				Looper.loop();
 				break;
 			}
 			super.run();

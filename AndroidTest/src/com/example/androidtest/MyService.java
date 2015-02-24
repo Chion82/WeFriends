@@ -1,5 +1,7 @@
 package com.example.androidtest;
 
+import java.util.Date;
+
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
@@ -9,13 +11,24 @@ import android.os.RemoteException;
 import android.util.Log;
 
 public class MyService extends Service {
-	
+	protected boolean running = false;
+
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		if (!running) {
+			thread.start();
+			running = true;
+		}
+		return super.onStartCommand(intent, flags, startId);
+	}
+
 	protected MyBinder binder = new MyBinder();
 
 	@Override
 	public IBinder onBind(Intent intent) {
 		Log.d("test","Service On Bind");
 		Log.d("test","Data from caller:" + intent.getStringExtra("data"));
+		
 		return binder;
 	}
 	
@@ -28,13 +41,26 @@ public class MyService extends Service {
 		@Override
 		protected boolean onTransact(int code, Parcel data, Parcel reply,
 				int flags) throws RemoteException {
-			
 			Log.d("test","From MyService get data:" + data.readString());
 			reply.writeString("ACK!ACK!");
 			
 			return super.onTransact(code, data, reply, flags);
 		}
-		
 	}
+	
+	protected Thread thread = new Thread() {
+		@Override
+		public void run() {
+			while (true) {
+				try {
+					sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				Log.d("test","Service runnnig." + new Date().getTime()/1000);
+			}
+		}
+	};
 
 }

@@ -35,6 +35,8 @@ public class MainActivity extends ActionBarActivity {
 	protected void onDestroy() {
 		
 		unregisterReceiver(receiver);
+		
+		unbindService(conn);
 
 		super.onDestroy();
 	}
@@ -145,6 +147,7 @@ public class MainActivity extends ActionBarActivity {
 				intent.setClass(MainActivity.this, MyService.class);
 				intent.putExtra("data", "Data From MainActivity");
 				bindService(intent,conn,BIND_AUTO_CREATE);
+				startService(intent);
 			}
 		});
 		

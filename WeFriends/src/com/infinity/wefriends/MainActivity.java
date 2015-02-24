@@ -27,7 +27,7 @@ import com.infinity.wefriends.apis.Users;
 
 public class MainActivity extends ActionBarActivity {
 	
-	public static final int MAIN_LOADALLDATA = 100;
+	public static final int MAIN_LOADALLONLINEDATA = 100;
 
 	public int currentPage = NavBarButton.CHATS;
 	
@@ -52,8 +52,11 @@ public class MainActivity extends ActionBarActivity {
 
 	}
 	
-	public void loadAllData() {
+	public void loadAllOnlineData() {
 		Log.d("WeFriends","Loading All Data.");
+		Users users = new Users(this);
+		users.getAndSaveUserInfo();
+		users.getAndSaveFriendList();
 	}
 	
 
@@ -108,8 +111,8 @@ public class MainActivity extends ActionBarActivity {
 		@Override
 		public void handleMessage(Message msg) {
 			switch(msg.what) {
-			case MAIN_LOADALLDATA:
-				loadAllData();
+			case MAIN_LOADALLONLINEDATA:
+				loadAllOnlineData();
 				break;
 			}
 			super.handleMessage(msg);

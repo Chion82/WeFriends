@@ -32,7 +32,7 @@ public class MainAsyncTask {
 				m_context.startActivity(intent);
 				((MainActivity)m_context).finish();
 			} else {
-				((MainActivity)m_context).handler.sendEmptyMessage(MainActivity.MAIN_LOADALLDATA);
+				((MainActivity)m_context).handler.sendEmptyMessage(MainActivity.MAIN_LOADALLONLINEDATA);
 			}
 			super.run();
 		}
