@@ -104,7 +104,7 @@ public class NavBarButton extends LinearLayout {
 	protected class navBarButtonOnClickListener implements View.OnClickListener {
 		@Override
 		public void onClick(View v) {
-			m_parent.onPageChanged(m_label);
+			m_parent.onPageChanged(m_label,true);
 		}
 	}
 

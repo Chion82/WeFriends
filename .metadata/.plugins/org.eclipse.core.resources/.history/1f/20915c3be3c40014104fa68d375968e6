@@ -1,0 +1,47 @@
+package com.infinity.utils;
+
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.os.Handler;
+import android.os.Message;
+import android.util.AttributeSet;
+import android.widget.ImageView;
+
+public class OnlineImageView extends ImageView {
+	
+	static public final int LOADBITMAP = 100;
+	
+	public ImageHandler handler = new ImageHandler();
+	
+	class ImageHandler extends Handler {
+
+		@Override
+		public void handleMessage(Message msg) {
+			switch(msg.what) {
+			case LOADBITMAP:
+				OnlineImageView.this.setImageBitmap((Bitmap)(msg.getData().getParcelable("bitmap")));
+				break;
+			}
+			
+			super.handleMessage(msg);
+		}
+		
+	}	
+
+	public OnlineImageView(Context context, AttributeSet attrs, int defStyleAttr) {
+		super(context, attrs, defStyleAttr);
+		// TODO Auto-generated constructor stub
+	}
+
+	public OnlineImageView(Context context, AttributeSet attrs) {
+		super(context, attrs);
+		// TODO Auto-generated constructor stub
+	}
+
+	public OnlineImageView(Context context) {
+		super(context);
+		// TODO Auto-generated constructor stub
+	}
+
+
+}

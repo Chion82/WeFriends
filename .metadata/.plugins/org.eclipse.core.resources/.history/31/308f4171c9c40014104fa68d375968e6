@@ -1,0 +1,103 @@
+package com.infinity.wefriends;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import android.content.ContentValues;
+import android.content.Context;
+import android.util.AttributeSet;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+
+public class ContactListAdapter extends BaseAdapter {
+	
+	protected List<ContentValues> contactList = null;
+	List<String> groupList = null;
+	List<HashMap<String,Integer>> parsedList = null;
+	
+	public ContactListAdapter(List<ContentValues> valueList) {
+		contactList = valueList;
+		groupList = getGroupList();
+	}
+
+	@Override
+	public int getCount() {
+		return parsedList.size();
+	}
+
+	@Override
+	public Object getItem(int position) {
+		return null;
+	}
+
+	@Override
+	public long getItemId(int position) {
+		return position;
+	}
+
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
+		
+		return null;
+	}
+	
+	protected List<String> getGroupList() {
+		List<String> groupList = new ArrayList<String>();
+		int contactCount = contactList.size();
+		for (int i=0;i<contactCount;i++) {
+			String groupName = contactList.get(i).getAsString("friendgroup");
+			if (!groupList.contains(groupName)) {
+				groupList.add(groupName);
+			}
+		}
+		return groupList;
+	}
+	
+	protected List<HashMap<String, Integer>> parseContactList() {
+		int groupCount = groupList.size();
+		int contactCount = contactList.size();
+		List<HashMap<String, Integer>> resultList = new ArrayList<HashMap<String,Integer>>();
+		for (int groupIndex=0;groupIndex<groupCount;groupIndex++) {
+			HashMap<String,Integer> groupMap = new HashMap<String,Integer>();
+			groupMap.put("isGroup", 1);
+			groupMap.put("groupIndex", groupIndex);
+			resultList.add(groupMap);
+			String groupName = groupList.get(groupIndex);
+			for (int contactIndex=0;contactIndex<contactCount;contactIndex++) {
+				if (contactList.get(contactIndex).getAsString("friendgroup")==groupName) {
+					HashMap<String,Integer> contactMap = new HashMap<String,Integer>();
+					contactMap.put("isGroup", 0);
+					contactMap.put("contactIndex", contactIndex);
+					resultList.add(contactMap);
+				}
+			}
+		}
+		return resultList;
+	}
+	
+	class ContactView extends View {
+		
+		public String groupName = null;
+
+		public ContactView(Context context, AttributeSet attrs,
+				int defStyleAttr, int defStyleRes) {
+			super(context, attrs, defStyleAttr, defStyleRes);
+		}
+
+		public ContactView(Context context, AttributeSet attrs, int defStyleAttr) {
+			super(context, attrs, defStyleAttr);
+		}
+
+		public ContactView(Context context, AttributeSet attrs) {
+			super(context, attrs);
+		}
+
+		public ContactView(Context context) {
+			super(context);
+		}
+		
+	}
+
+}

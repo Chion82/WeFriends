@@ -3,7 +3,7 @@
     
     <string name="server_host">192.168.1.100</string>
     <string name="server_web_service_port">8000</string>
-    <string name="server_notification_port">38700</string>
+    <string name="server_notifier_port">38700</string>
 
     <string name="app_name">友趣聊</string>
     <string name="hello_world">世界你好！</string>

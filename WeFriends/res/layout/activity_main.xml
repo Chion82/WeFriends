@@ -2,29 +2,28 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.wefriends.MainActivity"
-    android:background="#DDDDDD" >
+    android:background="#DDDDDD"
+    tools:context="com.example.wefriends.MainActivity" >
 
-    <TextView
-        android:id="@+id/main_text_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
-    
+	<android.support.v4.view.ViewPager android:id="@+id/main_view_pager"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent" />
+
     <LinearLayout
         android:id="@+id/nav_bar_group"
-        android:layout_width="match_parent" 
+        android:layout_width="match_parent"
         android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
         android:background="#FFFFFF"
-        android:layout_alignParentBottom="true" 
-        android:orientation="horizontal">
-        
-   	</LinearLayout>
-   	
-    
-    <View android:layout_width="match_parent"
-    	android:layout_height="1dp"
-    	android:background="#999999"
-    	android:layout_above="@id/nav_bar_group" />
+        android:orientation="horizontal" >
+    </LinearLayout>
+
+    <View
+        android:id="@+id/view1"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_above="@id/nav_bar_group"
+        android:background="#999999" />
+
 
 </RelativeLayout>

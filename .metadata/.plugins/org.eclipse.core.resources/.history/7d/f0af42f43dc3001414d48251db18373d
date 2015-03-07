@@ -1,0 +1,59 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.wefriends.MainActivity"
+    android:background="#DDDDDD" >
+
+    <LinearLayout android:id="@+id/main_view_content_layout" 
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal" >
+        
+        <LinearLayout android:id="@+id/main_layout_chats" 
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="#00AA00" >
+        </LinearLayout>
+        
+        <LinearLayout android:id="@+id/main_layout_friends" 
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="#AA0000" >
+        </LinearLayout>
+        
+        <LinearLayout android:id="@+id/main_layout_discovery" 
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="#0000AA" >
+        </LinearLayout>
+        
+        <LinearLayout android:id="@+id/main_layout_me" 
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="#00AAAA" >
+        </LinearLayout>
+        
+    </LinearLayout>
+    
+    <LinearLayout
+        android:id="@+id/nav_bar_group"
+        android:layout_width="match_parent" 
+        android:layout_height="60dp"
+        android:background="#FFFFFF"
+        android:layout_alignParentBottom="true" 
+        android:orientation="horizontal">
+        
+   	</LinearLayout>
+   	
+    
+    <View android:layout_width="match_parent"
+    	android:layout_height="1dp"
+    	android:background="#999999"
+    	android:layout_above="@id/nav_bar_group" />
+
+</RelativeLayout>
