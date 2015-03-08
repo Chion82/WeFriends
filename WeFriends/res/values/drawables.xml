@@ -3,4 +3,6 @@
     <drawable name="actionBarDrawable">#6FA8DC</drawable>
     <drawable name="lightBlue">#6FA8DC</drawable>
     <drawable name="darkBlue">#1E90FF</drawable>
+    <drawable name="white">#FFFFFF</drawable>
+    <drawable name="dark">#E8E8E8</drawable>
 </resources>

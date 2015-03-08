@@ -22,10 +22,10 @@ import android.util.Log;
 import com.infinity.utils.*;
 import com.infinity.wefriends.MainActivity;
 import com.infinity.wefriends.R;
-import com.infinity.wefriends.apis.DataBaseHelper;
+import com.infinity.wefriends.apis.DatabaseHelper;
 
 public class Users {
-	protected DataBaseHelper database = null;
+	protected DatabaseHelper database = null;
 	protected Context m_context = null;
 	
 	public static final int TOKEN_VALID = 200;
@@ -37,7 +37,7 @@ public class Users {
 	
 	public Users(Context context) {
 		m_context = context;
-		database = new DataBaseHelper(context,"wefriendsdb");
+		database = new DatabaseHelper(context,"wefriendsdb");
 	}
 	
 	public int authenticateCachedAccessToken() {

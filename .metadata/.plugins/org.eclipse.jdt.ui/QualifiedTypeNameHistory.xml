@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-<fullyQualifiedTypeName name="android.content.ServiceConnection"/>
-<fullyQualifiedTypeName name="com.example.androidtest.MyService.MyBinder"/>
-<fullyQualifiedTypeName name="android.os.Parcel"/>
 <fullyQualifiedTypeName name="android.database.sqlite.SQLiteOpenHelper"/>
 <fullyQualifiedTypeName name="com.infinity.wefriends.DataBaseHelper"/>
 <fullyQualifiedTypeName name="android.database.sqlite.SQLiteCursor"/>
 <fullyQualifiedTypeName name="android.database.Cursor"/>
 <fullyQualifiedTypeName name="com.infinity.wefriends.R"/>
-<fullyQualifiedTypeName name="org.json.JSONObject"/>
 <fullyQualifiedTypeName name="android.database.sqlite.SQLiteDatabase"/>
 <fullyQualifiedTypeName name="com.infinity.wefriends.apis.DataBaseHelper"/>
 <fullyQualifiedTypeName name="com.infinity.wefriends.apis.Users"/>
@@ -23,8 +19,6 @@
 <fullyQualifiedTypeName name="android.widget.Button"/>
 <fullyQualifiedTypeName name="android.os.Looper"/>
 <fullyQualifiedTypeName name="java.util.Date"/>
-<fullyQualifiedTypeName name="com.infinity.utils.HttpRequest.Response"/>
-<fullyQualifiedTypeName name="org.json.JSONArray"/>
 <fullyQualifiedTypeName name="android.widget.ViewFlipper"/>
 <fullyQualifiedTypeName name="android.widget.RelativeLayout"/>
 <fullyQualifiedTypeName name="android.widget.HorizontalScrollView"/>
@@ -36,9 +30,6 @@
 <fullyQualifiedTypeName name="java.util.HashMap"/>
 <fullyQualifiedTypeName name="android.graphics.BitmapFactory"/>
 <fullyQualifiedTypeName name="android.os.Environment"/>
-<fullyQualifiedTypeName name="com.infinity.utils.HttpRequest"/>
-<fullyQualifiedTypeName name="java.util.List"/>
-<fullyQualifiedTypeName name="java.util.ArrayList"/>
 <fullyQualifiedTypeName name="android.widget.ListView"/>
 <fullyQualifiedTypeName name="android.util.Log"/>
 <fullyQualifiedTypeName name="android.os.Handler"/>
@@ -53,11 +44,20 @@
 <fullyQualifiedTypeName name="android.widget.LinearLayout"/>
 <fullyQualifiedTypeName name="android.widget.LinearLayout.LayoutParams"/>
 <fullyQualifiedTypeName name="android.widget.BaseExpandableListAdapter"/>
-<fullyQualifiedTypeName name="android.content.ContentValues"/>
-<fullyQualifiedTypeName name="android.content.Context"/>
 <fullyQualifiedTypeName name="android.view.LayoutInflater"/>
 <fullyQualifiedTypeName name="com.infinity.wefriends.R.layout"/>
 <fullyQualifiedTypeName name="com.infinity.wefriends.R.id"/>
 <fullyQualifiedTypeName name="android.widget.ImageView"/>
 <fullyQualifiedTypeName name="android.widget.ExpandableListView"/>
+<fullyQualifiedTypeName name="android.content.Context"/>
+<fullyQualifiedTypeName name="java.util.List"/>
+<fullyQualifiedTypeName name="android.content.ContentValues"/>
+<fullyQualifiedTypeName name="com.infinity.utils.AnimatedExpandableListView.AnimatedExpandableListAdapter"/>
+<fullyQualifiedTypeName name="android.widget.ExpandableListView.OnGroupClickListener"/>
+<fullyQualifiedTypeName name="com.infinity.utils.HttpRequest"/>
+<fullyQualifiedTypeName name="com.infinity.utils.HttpRequest.Response"/>
+<fullyQualifiedTypeName name="org.json.JSONObject"/>
+<fullyQualifiedTypeName name="org.json.JSONArray"/>
+<fullyQualifiedTypeName name="java.util.ArrayList"/>
+<fullyQualifiedTypeName name="com.infinity.wefriends.apis.Messages"/>
 </qualifiedTypeNameHistroy>

@@ -17,6 +17,8 @@ public class OnlineImageView extends ImageView {
 	
 	public ImageHandler handler = new ImageHandler();
 	
+	protected String currentUrl = new String();
+	
 	class ImageHandler extends Handler {
 
 		@Override
@@ -32,7 +34,11 @@ public class OnlineImageView extends ImageView {
 		
 	}
 	
-	public static void asyncLoadOnlineImage(final String url, final String cacheDirectory, final OnlineImageView imageView) {
+	public void asyncLoadOnlineImage(final String url, final String cacheDirectory) {
+		if (currentUrl.equals(url))
+			return;
+		currentUrl = url;
+		
 		File directory = new File(cacheDirectory);
 		if (!directory.exists()) {
 			directory.mkdirs();
@@ -47,7 +53,7 @@ public class OnlineImageView extends ImageView {
 			bundle.putParcelable("bitmap",bitmap);
 			msg.setData(bundle);
 			msg.what = OnlineImageView.LOADBITMAP;
-			imageView.handler.sendMessage(msg);
+			this.handler.sendMessage(msg);
 			return;
 		}
 		
@@ -61,7 +67,7 @@ public class OnlineImageView extends ImageView {
 					bundle.putParcelable("bitmap",bitmap);
 					msg.setData(bundle);
 					msg.what = OnlineImageView.LOADBITMAP;
-					imageView.handler.sendMessage(msg);
+					OnlineImageView.this.handler.sendMessage(msg);
 				}
 				super.run();
 			}

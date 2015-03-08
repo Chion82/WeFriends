@@ -1,0 +1,32 @@
+package com.infinity.wefriends.apis;
+
+import java.util.List;
+
+import com.infinity.utils.HttpRequest;
+import com.infinity.wefriends.R;
+
+import android.content.ContentValues;
+import android.content.Context;
+
+public class Messages {
+	protected Users users = null;
+	protected Context m_context;
+	protected String accessToken = null;
+	
+	public Messages(Context context) {
+		m_context = context;
+		users = new Users(context);
+		accessToken = users.getCachedAccessToken();
+	}
+	
+	public List<ContentValues> getAndSaveNewMessages() {
+		HttpRequest.Response response = new HttpRequest.Response();
+		String requestURL = "http://" + m_context.getString(R.string.server_host) + ":" + m_context.getString(R.string.server_web_service_port) + "/messages/getnewmessages?accesstoken=" + accessToken;
+		return null;
+	}
+	
+	public List<ContentValues> getCachedMessages(String sender) {
+		return null;
+	}
+
+}

@@ -3,6 +3,7 @@ package com.infinity.wefriends;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.infinity.utils.AnimatedExpandableListView.AnimatedExpandableListAdapter;
 import com.infinity.utils.OnlineImageView;
 
 import android.content.ContentValues;
@@ -15,7 +16,7 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class ContactExpandableListAdapter extends BaseExpandableListAdapter {
+public class ContactExpandableListAdapter extends AnimatedExpandableListAdapter {
 	
 	protected List<ContentValues> contactList = null;
 	protected List<String> groupList = null;
@@ -43,21 +44,6 @@ public class ContactExpandableListAdapter extends BaseExpandableListAdapter {
 		return childPosition;
 	}
 
-	@Override
-	public View getChildView(int groupPosition, int childPosition,
-			boolean isLastChild, View convertView, ViewGroup parent) {
-		ContentValues contactInfo = (ContentValues)getChild(groupPosition,childPosition);
-		View contactInfoView = inflater.inflate(R.layout.contact_list_item_view, null);
-		OnlineImageView.asyncLoadOnlineImage("http://" + m_context.getString(R.string.server_host) + ":" + m_context.getString(R.string.server_web_service_port) + "/" + contactInfo.getAsString("avatar"),Environment.getExternalStorageDirectory()+"/wefriends/cache",(OnlineImageView)contactInfoView.findViewById(R.id.contact_list_item_view_avatar));
-		((TextView)contactInfoView.findViewById(R.id.contact_list_item_view_main_title)).setText(contactInfo.getAsString("nickname"));
-		((TextView)contactInfoView.findViewById(R.id.contact_list_item_view_subtitle)).setText(contactInfo.getAsString("whatsup"));
-		return contactInfoView;
-	}
-
-	@Override
-	public int getChildrenCount(int groupPosition) {
-		return groupMemberList.get(groupPosition).size();
-	}
 
 	@Override
 	public Object getGroup(int groupPosition) {
@@ -128,6 +114,22 @@ public class ContactExpandableListAdapter extends BaseExpandableListAdapter {
 			}
 		}
 		return groupList;
+	}
+
+	@Override
+	public View getRealChildView(int groupPosition, int childPosition,
+			boolean isLastChild, View convertView, ViewGroup parent) {
+		ContentValues contactInfo = (ContentValues)getChild(groupPosition,childPosition);
+		View contactInfoView = inflater.inflate(R.layout.contact_list_item_view, null);
+		((OnlineImageView)contactInfoView.findViewById(R.id.contact_list_item_view_avatar)).asyncLoadOnlineImage("http://" + m_context.getString(R.string.server_host) + ":" + m_context.getString(R.string.server_web_service_port) + "/" + contactInfo.getAsString("avatar"),Environment.getExternalStorageDirectory()+"/wefriends/cache");
+		((TextView)contactInfoView.findViewById(R.id.contact_list_item_view_main_title)).setText(contactInfo.getAsString("nickname"));
+		((TextView)contactInfoView.findViewById(R.id.contact_list_item_view_subtitle)).setText(contactInfo.getAsString("whatsup"));
+		return contactInfoView;
+	}
+
+	@Override
+	public int getRealChildrenCount(int groupPosition) {
+		return groupMemberList.get(groupPosition).size();
 	}
 
 }

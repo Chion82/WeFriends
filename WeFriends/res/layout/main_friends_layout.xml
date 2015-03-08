@@ -4,11 +4,11 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
     
-    <ExpandableListView android:id="@+id/main_contact_list_view"
+    <com.infinity.utils.AnimatedExpandableListView android:id="@+id/main_contact_list_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:groupIndicator="@null" >
         
-    </ExpandableListView>
+    </com.infinity.utils.AnimatedExpandableListView>
 
 </LinearLayout>

@@ -1,0 +1,22 @@
+package com.infinity.wefriends.apis;
+
+import java.util.List;
+
+import android.content.ContentValues;
+import android.content.Context;
+
+public class Messages {
+	protected Users users = null;
+	protected Context m_context;
+	
+	public Messages(Context context) {
+		m_context = context;
+		users = new Users(context);
+	}
+	
+	public List<ContentValues> getAndSaveNewMessages() {
+		
+		return null;
+	}
+
+}

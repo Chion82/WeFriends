@@ -23,6 +23,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ExpandableListView;
+import android.widget.ExpandableListView.OnGroupClickListener;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -31,7 +32,7 @@ import android.widget.TextView;
 import android.widget.ViewFlipper;
 
 import com.infinity.utils.*;
-import com.infinity.wefriends.apis.DataBaseHelper;
+import com.infinity.wefriends.apis.Messages;
 import com.infinity.wefriends.apis.Users;
 
 public class MainActivity extends ActionBarActivity {
@@ -56,7 +57,7 @@ public class MainActivity extends ActionBarActivity {
 	protected View discoveryView = null;
 	protected View meView = null;
 	
-	protected ExpandableListView contactListView = null;
+	protected AnimatedExpandableListView contactListView = null;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -87,7 +88,7 @@ public class MainActivity extends ActionBarActivity {
 		
 		//TODO
 		
-		contactListView = (ExpandableListView)friendsView.findViewById(R.id.main_contact_list_view);
+		contactListView = (AnimatedExpandableListView)friendsView.findViewById(R.id.main_contact_list_view);
 		
 		/*Execute async tasks*/
 		/*Should be called after initialization*/
@@ -98,9 +99,8 @@ public class MainActivity extends ActionBarActivity {
 	
 	public void loadAllOnlineData() {
 		Log.d("WeFriends","Loading All Data.");
-		Users users = new Users(this);
-		users.getAndSaveUserInfo();
-		users.getAndSaveFriendList();
+		Messages messages = new Messages(this);
+		messages.getAndSaveNewMessages();
 	}
 	
 
@@ -144,6 +144,19 @@ public class MainActivity extends ActionBarActivity {
 	public void loadContactViewList(List<ContentValues> contactsInfo) {
 		ContactExpandableListAdapter contactListAdapter = new ContactExpandableListAdapter(this, contactsInfo);
 		contactListView.setAdapter(contactListAdapter);
+		contactListView.setOnGroupClickListener(new OnGroupClickListener() {
+			
+			@Override
+			public boolean onGroupClick(ExpandableListView parent, View v,
+					int groupPosition, long id) {
+				if (contactListView.isGroupExpanded(groupPosition)) {
+					contactListView.collapseGroupWithAnimation(groupPosition);
+				} else {
+					contactListView.expandGroupWithAnimation(groupPosition);
+				}
+				return true;
+			}
+		});
 		
 	}
 	

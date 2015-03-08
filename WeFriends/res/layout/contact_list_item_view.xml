@@ -6,7 +6,7 @@
     android:paddingBottom="5dp"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:background="#FFFFFF" >
+    android:background="@drawable/button_background_white" >
     
     <com.infinity.utils.OnlineImageView android:id="@+id/contact_list_item_view_avatar"
         android:layout_marginLeft="10dp"

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    android:background="#FFFFFF"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:background="@drawable/button_background_white" >   
+   
+    <ImageView android:id="@+id/contact_list_group_toggle_icon"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_width="15dp"
+        android:layout_height="15dp"
+        android:src="@drawable/ic_action_down" />
+    
+    <TextView android:id="@+id/contact_list_group_toggle_title"
+        android:textColor="#7A7A7A"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:singleLine="true" />    
+
+</LinearLayout>
