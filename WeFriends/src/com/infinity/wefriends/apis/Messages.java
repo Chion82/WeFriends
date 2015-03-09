@@ -1,5 +1,7 @@
 package com.infinity.wefriends.apis;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +14,7 @@ import com.infinity.wefriends.R;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 public class Messages {
@@ -47,11 +50,11 @@ public class Messages {
 			for (int i=0;i<messageCount;i++) {
 				JSONObject messageObj = jsonArray.getJSONObject(i);
 				ContentValues message = new ContentValues();
-				message.put("sender", messageObj.getString("sender"));
-				message.put("messagetype", messageObj.getString("messagetype"));
-				message.put("chatgroup", messageObj.getString("chatgroup"));
+				message.put("sender", URLDecoder.decode(messageObj.getString("sender"),"utf-8"));
+				message.put("messagetype",messageObj.getString("messagetype"));
+				message.put("chatgroup", URLDecoder.decode(messageObj.getString("chatgroup"),"utf-8"));
 				message.put("timestramp", messageObj.getLong("timestramp"));
-				message.put("message", messageObj.getString("message"));
+				message.put("message", URLDecoder.decode(messageObj.getString("message"),"utf-8"));
 				message.put("ishandled", 0);
 				messageList.add(message);
 				db.insert("messagecache", "", message);
@@ -62,12 +65,61 @@ public class Messages {
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return null;
 	}
 	
 	public List<ContentValues> getCachedMessages(String messageType, String sender, String chatGroup, int page) {
-		return null;
+		SQLiteDatabase db = database.getReadableDatabase();
+		Cursor cursor = db.query("messagecache", new String[]{"sender", "messagetype", "chatgroup", "timestramp", "message", "ishandled"} , "", new String[]{}, "", "", "timestramp DESC");
+		List<ContentValues> resultList = new ArrayList<ContentValues>();
+		while (cursor.moveToNext()) {
+			ContentValues value = new ContentValues();
+			value.put("sender", cursor.getString(cursor.getColumnIndex("sender")));
+			value.put("messagetype", cursor.getString(cursor.getColumnIndex("messagetype")));
+			value.put("chatgroup", cursor.getString(cursor.getColumnIndex("chatgroup")));
+			value.put("timestramp", cursor.getLong(cursor.getColumnIndex("timestramp")));
+			value.put("message", cursor.getString(cursor.getColumnIndex("message")));
+			value.put("ishandled", cursor.getInt(cursor.getColumnIndex("ishandled")));
+			
+			if (messageType!=null && (!messageType.equals("")) && messageType.equals(value.getAsString("messagetype")))
+				resultList.add(value);
+			else if (messageType==null || messageType.equals(""))
+				resultList.add(value);
+			
+			if (sender!=null && (!sender.equals("")) && sender.equals(value.getAsString("sender")))
+				resultList.add(value);
+			else if (sender==null || sender.equals(""))
+				resultList.add(value);
+			
+			if (chatGroup!=null && (!chatGroup.equals("")) && chatGroup.equals(value.getAsString("chatgroup")))
+				resultList.add(value);
+			else if (chatGroup==null || chatGroup.equals(""))
+				resultList.add(value);
+			
+		}
+		db.close();
+		
+		if (page==0) {
+			return resultList;
+		}
+		
+		int skipCount = (page-1) * 15;
+		for (int i=0;i<skipCount;i++) {
+			if (resultList.size() > 0)
+				resultList.remove(0);
+		}
+		
+		List<ContentValues> newList = new ArrayList<ContentValues>();
+		for (int i=0;i<15;i++) {
+			if (resultList.size() >= (i+1))
+				newList.add(resultList.get(i));
+		}
+		
+		return newList;
 	}
 
 }

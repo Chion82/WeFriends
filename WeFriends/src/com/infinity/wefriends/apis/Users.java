@@ -181,7 +181,7 @@ public class Users {
 			return null;
 		List<ContentValues> list = new ArrayList<ContentValues>();
 		ContentValues friendInfo = null;
-		while (!cursor.moveToNext()) {
+		while (cursor.moveToNext()) {
 			friendInfo = new ContentValues();
 			friendInfo.put("wefriendsid", cursor.getString(cursor.getColumnIndex("wefriendsid")));
 			friendInfo.put("nickname", cursor.getString(cursor.getColumnIndex("nickname")));

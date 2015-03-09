@@ -29,6 +29,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import com.infinity.utils.*;
@@ -39,6 +40,7 @@ public class MainActivity extends ActionBarActivity {
 
 	public static final int MAIN_LOADALLONLINEDATA = 100;
 	public static final int MAIN_LOADONLINECONTACTLIST = 101;
+	public static final int SHOWTOAST =  102;
 
 	public int currentPage = NavBarButton.CHATS;
 	
@@ -58,6 +60,7 @@ public class MainActivity extends ActionBarActivity {
 	protected View meView = null;
 	
 	protected AnimatedExpandableListView contactListView = null;
+	protected Users usersAPI = null;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -85,15 +88,18 @@ public class MainActivity extends ActionBarActivity {
 		mainViewPager.setOnPageChangeListener(mainViewPagerListener);
 		
 		asyncTask = new MainAsyncTask(this);
-		
-		//TODO
+		usersAPI = new Users(this);
+
 		
 		contactListView = (AnimatedExpandableListView)friendsView.findViewById(R.id.main_contact_list_view);
 		
+		/*Load Cached Data*/
+		loadCachedData();
+		
+		/*Load Online Data*/
 		/*Execute async tasks*/
 		/*Should be called after initialization*/
 		asyncTask.initCheckUserInfo();
-		asyncTask.loadOnlineFriendList();
 		
 	}
 	
@@ -101,9 +107,110 @@ public class MainActivity extends ActionBarActivity {
 		Log.d("WeFriends","Loading All Data.");
 		Messages messages = new Messages(this);
 		messages.getAndSaveNewMessages();
+		asyncTask.loadOnlineFriendList();
+		//TODO
 	}
 	
+	public void loadCachedData() {
+		List<ContentValues> contactList = usersAPI.getCachedFriendList();
+		if (contactList != null)
+		{
+			loadContactViewList(contactList);
+			Log.d("WeFriends","Loading cached contact list");
+			Log.d("WeFriends","" + contactList.size());
+		}
+		//TODO
+	}
+	
+	public void loadContactViewList(List<ContentValues> contactsInfo) {
+		ContactExpandableListAdapter contactListAdapter = new ContactExpandableListAdapter(this, contactsInfo);
+		contactListView.setAdapter(contactListAdapter);
+		contactListView.setOnGroupClickListener(new OnGroupClickListener() {
+			
+			@Override
+			public boolean onGroupClick(ExpandableListView parent, View v,
+					int groupPosition, long id) {
+				if (contactListView.isGroupExpanded(groupPosition)) {
+					contactListView.collapseGroupWithAnimation(groupPosition);
+				} else {
+					contactListView.expandGroupWithAnimation(groupPosition);
+				}
+				return true;
+			}
+		});
+		
+	}
+	
+	
+	protected class MainActivityHandler extends Handler {
 
+		@Override
+		public void handleMessage(Message msg) {
+			switch(msg.what) {
+			case MAIN_LOADALLONLINEDATA:
+				loadAllOnlineData();
+				break;
+			case MAIN_LOADONLINECONTACTLIST:
+				loadContactViewList((ArrayList<ContentValues>)(msg.getData().getParcelableArrayList("contactlist").get(0)));
+				break;
+			case SHOWTOAST:
+				Toast.makeText(MainActivity.this, msg.getData().getString("text"), Toast.LENGTH_SHORT).show();
+				break;
+			}
+			super.handleMessage(msg);
+		}
+		
+	}
+	
+	
+	/////////////////////////////UI Initialization///////////////////////////////////////
+	/////////////////////////Currently no active modification here/////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////////
+	private ViewPager.OnPageChangeListener mainViewPagerListener = new ViewPager.OnPageChangeListener() {
+		
+		@Override
+		public void onPageSelected(int pageIndex) {
+			onPageChanged(pageIndex,false);
+		}
+		
+		@Override
+		public void onPageScrolled(int arg0, float arg1, int arg2) {
+			// TODO Auto-generated method stub
+			
+		}
+		
+		@Override
+		public void onPageScrollStateChanged(int arg0) {
+			// TODO Auto-generated method stub
+			
+		}
+	};
+	
+	protected void initNavBar() {
+		navBarChats = new NavBarButton(getApplicationContext(),NavBarButton.CHATS,this);
+		navBarContacts = new NavBarButton(getApplicationContext(),NavBarButton.CONTACTS,this);
+		navBarDiscovery = new NavBarButton(getApplicationContext(),NavBarButton.DISCOVERY,this);
+		navBarMe = new NavBarButton(getApplicationContext(),NavBarButton.ME,this);
+		
+		LinearLayout navGroupLayout = (LinearLayout)findViewById(R.id.nav_bar_group);
+		navGroupLayout.addView(navBarChats);
+		navGroupLayout.addView(navBarContacts);
+		navGroupLayout.addView(navBarDiscovery);
+		navGroupLayout.addView(navBarMe);
+		
+		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.MATCH_PARENT,1);
+		
+		navBarChats.setLayoutParams(params);
+		navBarContacts.setLayoutParams(params);
+		navBarDiscovery.setLayoutParams(params);
+		navBarMe.setLayoutParams(params);
+		
+		navBarChats.setGravity(Gravity.CENTER_HORIZONTAL);
+		navBarContacts.setGravity(Gravity.CENTER_HORIZONTAL);
+		navBarDiscovery.setGravity(Gravity.CENTER_HORIZONTAL);
+		navBarMe.setGravity(Gravity.CENTER_HORIZONTAL);
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.actionbar, menu);
@@ -140,85 +247,4 @@ public class MainActivity extends ActionBarActivity {
 			}
 		}
 	}
-	
-	public void loadContactViewList(List<ContentValues> contactsInfo) {
-		ContactExpandableListAdapter contactListAdapter = new ContactExpandableListAdapter(this, contactsInfo);
-		contactListView.setAdapter(contactListAdapter);
-		contactListView.setOnGroupClickListener(new OnGroupClickListener() {
-			
-			@Override
-			public boolean onGroupClick(ExpandableListView parent, View v,
-					int groupPosition, long id) {
-				if (contactListView.isGroupExpanded(groupPosition)) {
-					contactListView.collapseGroupWithAnimation(groupPosition);
-				} else {
-					contactListView.expandGroupWithAnimation(groupPosition);
-				}
-				return true;
-			}
-		});
-		
-	}
-	
-	protected void initNavBar() {
-		navBarChats = new NavBarButton(getApplicationContext(),NavBarButton.CHATS,this);
-		navBarContacts = new NavBarButton(getApplicationContext(),NavBarButton.CONTACTS,this);
-		navBarDiscovery = new NavBarButton(getApplicationContext(),NavBarButton.DISCOVERY,this);
-		navBarMe = new NavBarButton(getApplicationContext(),NavBarButton.ME,this);
-		
-		LinearLayout navGroupLayout = (LinearLayout)findViewById(R.id.nav_bar_group);
-		navGroupLayout.addView(navBarChats);
-		navGroupLayout.addView(navBarContacts);
-		navGroupLayout.addView(navBarDiscovery);
-		navGroupLayout.addView(navBarMe);
-		
-		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.MATCH_PARENT,1);
-		
-		navBarChats.setLayoutParams(params);
-		navBarContacts.setLayoutParams(params);
-		navBarDiscovery.setLayoutParams(params);
-		navBarMe.setLayoutParams(params);
-		
-		navBarChats.setGravity(Gravity.CENTER_HORIZONTAL);
-		navBarContacts.setGravity(Gravity.CENTER_HORIZONTAL);
-		navBarDiscovery.setGravity(Gravity.CENTER_HORIZONTAL);
-		navBarMe.setGravity(Gravity.CENTER_HORIZONTAL);
-	}
-	
-	protected class MainActivityHandler extends Handler {
-
-		@Override
-		public void handleMessage(Message msg) {
-			switch(msg.what) {
-			case MAIN_LOADALLONLINEDATA:
-				loadAllOnlineData();
-				break;
-			case MAIN_LOADONLINECONTACTLIST:
-				loadContactViewList((ArrayList<ContentValues>)(msg.getData().getParcelableArrayList("contactlist").get(0)));
-				break;
-			}
-			super.handleMessage(msg);
-		}
-		
-	}
-	
-	private ViewPager.OnPageChangeListener mainViewPagerListener = new ViewPager.OnPageChangeListener() {
-		
-		@Override
-		public void onPageSelected(int pageIndex) {
-			onPageChanged(pageIndex,false);
-		}
-		
-		@Override
-		public void onPageScrolled(int arg0, float arg1, int arg2) {
-			// TODO Auto-generated method stub
-			
-		}
-		
-		@Override
-		public void onPageScrollStateChanged(int arg0) {
-			// TODO Auto-generated method stub
-			
-		}
-	};
 }
