@@ -527,6 +527,7 @@ int string nav_bar_chats 0x7f0a001f
 int string nav_bar_contacts 0x7f0a0020
 int string nav_bar_discovery 0x7f0a0021
 int string nav_bar_me 0x7f0a0022
+int string notification_new_im 0x7f0a0023
 int string password 0x7f0a0018
 int string phone_number 0x7f0a0017
 int string server_host 0x7f0a0010

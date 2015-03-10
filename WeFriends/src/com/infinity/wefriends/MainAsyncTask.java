@@ -29,12 +29,14 @@ public class MainAsyncTask {
 		messages = new Messages(context);
 	}
 	
-	public void retrieveAndHandleNewMessages() {
+	public void handleNewMessages() {
 		new Thread() {
 
 			@Override
 			public void run() {
-				messages.getAndSaveNewMessages();
+				//TODO : Analyze new messages and add to chat list
+				//Online-update sender info if necessary
+				//when finishes, send MAIN_HANDLENEWMESSAGES to MainActivity
 				super.run();
 			}
 			

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="server_host">192.168.1.100</string>
+    <string name="server_web_service_port">8000</string>
+    <string name="server_notifier_port">38700</string>
+
+    <string name="app_name">友趣聊</string>
+    <string name="hello_world">世界你好！</string>
+    <string name="action_settings">设置</string>
+    
+    <string name="login">登录</string>
+    <string name="phone_number">手机号</string>
+    <string name="password">密码</string>
+    <string name="login_failed">登陆失败！请检查手机号或密码是否正确。</string>
+    <string name="connection_error">无法连接网络！请检查网络连接。</string>
+    
+    <string name="loggingin">登录中</string>
+    
+    <string name="action_search">搜索</string>
+    <string name="action_overflow">添加</string>
+    <string name="action_add_friend">添加聊友</string>
+    
+    <string name="nav_bar_chats">消息</string>
+    <string name="nav_bar_contacts">我的聊友</string>
+    <string name="nav_bar_discovery">发现</string>
+    <string name="nav_bar_me">我</string>
+    
+
+</resources>

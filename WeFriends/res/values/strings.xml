@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     
-    <string name="server_host">192.168.1.100</string>
+    <string name="server_host">192.168.1.117</string>
     <string name="server_web_service_port">8000</string>
     <string name="server_notifier_port">38700</string>
 
@@ -25,6 +25,8 @@
     <string name="nav_bar_contacts">我的聊友</string>
     <string name="nav_bar_discovery">发现</string>
     <string name="nav_bar_me">我</string>
+    
+    <string name="notification_new_im">向你发送消息</string>
     
 
 </resources>

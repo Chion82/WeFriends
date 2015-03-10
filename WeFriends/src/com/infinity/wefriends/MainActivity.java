@@ -46,6 +46,7 @@ public class MainActivity extends ActionBarActivity {
 	public static final int MAIN_LOADALLONLINEDATA = 100;
 	public static final int MAIN_LOADONLINECONTACTLIST = 101;
 	public static final int SHOWTOAST =  102;
+	public static final int MAIN_HANDLENEWMESSAGES = 103;
 
 	public int currentPage = NavBarButton.CHATS;
 	
@@ -135,7 +136,6 @@ public class MainActivity extends ActionBarActivity {
 	
 	public void loadAllOnlineData() {
 		Log.d("WeFriends","Loading All Data.");
-		asyncTask.retrieveAndHandleNewMessages();
 		asyncTask.loadOnlineFriendList();
 		initNotifierService();
 		//TODO
@@ -195,6 +195,9 @@ public class MainActivity extends ActionBarActivity {
 				break;
 			case SHOWTOAST:
 				Toast.makeText(MainActivity.this, msg.getData().getString("text"), Toast.LENGTH_SHORT).show();
+				break;
+			case MAIN_HANDLENEWMESSAGES:
+				
 				break;
 			}
 			super.handleMessage(msg);

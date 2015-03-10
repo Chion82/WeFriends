@@ -1898,6 +1898,7 @@ containing a value of this type.
         public static final int nav_bar_contacts=0x7f0a0020;
         public static final int nav_bar_discovery=0x7f0a0021;
         public static final int nav_bar_me=0x7f0a0022;
+        public static final int notification_new_im=0x7f0a0023;
         public static final int password=0x7f0a0018;
         public static final int phone_number=0x7f0a0017;
         public static final int server_host=0x7f0a0010;

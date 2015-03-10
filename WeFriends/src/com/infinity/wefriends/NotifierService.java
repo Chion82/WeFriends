@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.infinity.utils.HttpRequest;
@@ -13,6 +14,7 @@ import com.infinity.wefriends.apis.Users;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentValues;
 import android.content.Context;
@@ -21,12 +23,16 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
 public class NotifierService extends Service {
 	
-	public static String newMessagesAction = "WEFRIENDS_NEW_MESSAGES";
+	public static final String NEW_MESSAGE_ACTION = "WEFRIENDS_NEW_MESSAGES";
+	
+	public static final int SEND_NOTIFICATION = 100;
+	static public final int SHOWTOAST = 102;
 	
 	protected boolean isBound = false;
 	protected boolean isFirstlyCreated = true;
@@ -57,7 +63,7 @@ public class NotifierService extends Service {
 	@Override
 	public IBinder onBind(Intent intent) {
 		m_context = getApplicationContext();
-		notificationManager = (NotificationManager)m_context.getSystemService(Context.NOTIFICATION_SERVICE);
+		notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
 		users = new Users(m_context);
 		messagesAPI = new Messages(m_context);
 		ContentValues userInfo = users.getCachedUserInfo();
@@ -107,7 +113,16 @@ public class NotifierService extends Service {
 							newMessages = messagesAPI.getAndSaveNewMessages();
 							if (newMessages != null)
 								if (newMessages.size() > 0)
-									sendNotification(newMessages);
+								{
+									Bundle bundle = new Bundle();
+									ArrayList list = new ArrayList();
+									list.add(newMessages);
+									bundle.putParcelableArrayList("messages", list);
+									Message msg = new Message();
+									msg.setData(bundle);
+									msg.what = SEND_NOTIFICATION;
+									NotifierService.this.handler.sendMessage(msg);
+								}
 						}
 					}
 					
@@ -123,6 +138,7 @@ public class NotifierService extends Service {
 						msgBundle.putString("text", "NotifierService:" + m_context.getString(R.string.connection_error));
 						Message msg = new Message();
 						msg.setData(msgBundle);
+						msg.what=NotifierService.SHOWTOAST;
 						handler.sendMessage(msg);
 						errorMsgSent = true;
 					}
@@ -138,25 +154,38 @@ public class NotifierService extends Service {
 		int messageCount = newMessages.size();
 		for (int i=0;i<messageCount;i++) {
 			ContentValues message = newMessages.get(i);
-			Notification notification = new Notification(R.drawable.ic_launcher, message.getAsString("message"), System.currentTimeMillis());
-			notificationManager.notify(notificationId, notification);
+			NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+					.setSmallIcon(R.drawable.ic_launcher)
+					.setContentTitle(message.getAsString("sendernickname") + m_context.getString(R.string.notification_new_im))
+					.setContentText(message.getAsString("message"));
+			Intent intent = new Intent();
+			intent.setClass(NotifierService.this, MainActivity.class);
+			PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+			builder.setContentIntent(pendingIntent);
+			Notification notification = builder.build();
+			notification.defaults |= Notification.DEFAULT_SOUND;
+			notification.defaults |= Notification.DEFAULT_VIBRATE;
+			notificationManager.notify(notificationId,notification);
+			
 			messagesAPI.bindNotification(message.getAsString("messageid"), notificationId);
 			notificationId++;
 		}
 		if (isBound) {
 			Intent intent = new Intent();
-			intent.setAction(newMessagesAction);
+			intent.setAction(NEW_MESSAGE_ACTION);
 			sendBroadcast(intent);
 		}
 	}
 	
 	class ServiceHandler extends Handler {
-		static public final int SHOWTOAST = 102;
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case SHOWTOAST:
 				Toast.makeText(m_context, msg.getData().getString("text"), Toast.LENGTH_SHORT).show();
+				break;
+			case SEND_NOTIFICATION:
+				sendNotification((List<ContentValues>)(msg.getData().getParcelableArrayList("messages").get(0)));
 				break;
 			}
 			super.handleMessage(msg);
