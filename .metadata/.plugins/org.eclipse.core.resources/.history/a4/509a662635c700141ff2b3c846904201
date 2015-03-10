@@ -3,7 +3,6 @@ package com.infinity.wefriends;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.infinity.wefriends.apis.Messages;
 import com.infinity.wefriends.apis.Users;
 
 import android.app.Activity;
@@ -21,12 +20,10 @@ import android.widget.Toast;
 public class MainAsyncTask {
 	Users users = null;
 	Context m_context = null;
-	Messages messages = null;
 	
 	public MainAsyncTask(Context context) {
 		m_context = context;
 		users = new Users(context);
-		messages = new Messages(context);
 	}
 	
 	public void retrieveAndHandleNewMessages() {
@@ -34,7 +31,7 @@ public class MainAsyncTask {
 
 			@Override
 			public void run() {
-				messages.getAndSaveNewMessages();
+				// TODO Auto-generated method stub
 				super.run();
 			}
 			

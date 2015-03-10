@@ -135,7 +135,8 @@ public class MainActivity extends ActionBarActivity {
 	
 	public void loadAllOnlineData() {
 		Log.d("WeFriends","Loading All Data.");
-		asyncTask.retrieveAndHandleNewMessages();
+		Messages messages = new Messages(this);
+		messages.getAndSaveNewMessages();
 		asyncTask.loadOnlineFriendList();
 		initNotifierService();
 		//TODO
