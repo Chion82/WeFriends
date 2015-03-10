@@ -46,7 +46,7 @@
 	<section name="SourceActionDialog.methods">
 		<item value="false" key="SynchronizedModifier"/>
 		<item value="false" key="Comments"/>
-		<item value="0" key="InsertPosition.v2"/>
+		<item value="2" key="InsertPosition.v2"/>
 		<item value="false" key="FinalModifier"/>
 	</section>
 	<section name="BreadcrumbItemDropDown">

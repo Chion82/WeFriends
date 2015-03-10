@@ -32,6 +32,8 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         </activity>
         
+        <service android:name=".NotifierService" />
+                
     </application>
     
 </manifest>

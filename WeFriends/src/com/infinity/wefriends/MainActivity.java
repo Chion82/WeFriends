@@ -9,11 +9,16 @@ import org.apache.http.message.BasicNameValuePair;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.app.ActionBar.LayoutParams;
+import android.content.ComponentName;
 import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
 import android.view.Gravity;
@@ -62,6 +67,8 @@ public class MainActivity extends ActionBarActivity {
 	protected AnimatedExpandableListView contactListView = null;
 	protected Users usersAPI = null;
 	
+	protected boolean isNotifierServiceBound = false;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -103,12 +110,38 @@ public class MainActivity extends ActionBarActivity {
 		
 	}
 	
+	public void initNotifierService() {
+		Intent intent = new Intent();
+		intent.setClass(this, NotifierService.class);
+		bindService(intent, conn, Context.BIND_AUTO_CREATE);
+		isNotifierServiceBound = true;
+	}
+	
+	ServiceConnection conn = new ServiceConnection() {
+
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+			// TODO Auto-generated method stub
+			
+		}
+		
+	};
+	
 	public void loadAllOnlineData() {
 		Log.d("WeFriends","Loading All Data.");
 		Messages messages = new Messages(this);
 		messages.getAndSaveNewMessages();
 		asyncTask.loadOnlineFriendList();
+		initNotifierService();
 		//TODO
+		
+
 	}
 	
 	public void loadCachedData() {
@@ -116,14 +149,14 @@ public class MainActivity extends ActionBarActivity {
 		if (contactList != null)
 		{
 			loadContactViewList(contactList);
-			Log.d("WeFriends","Loading cached contact list");
-			Log.d("WeFriends","" + contactList.size());
+			
 		}
 		//TODO
 	}
 	
 	public void loadContactViewList(List<ContentValues> contactsInfo) {
 		ContactExpandableListAdapter contactListAdapter = new ContactExpandableListAdapter(this, contactsInfo);
+		//TODO : Update contact list with non-handled messages
 		contactListView.setAdapter(contactListAdapter);
 		contactListView.setOnGroupClickListener(new OnGroupClickListener() {
 			
@@ -142,6 +175,14 @@ public class MainActivity extends ActionBarActivity {
 	}
 	
 	
+	@Override
+	protected void onDestroy() {
+		if (isNotifierServiceBound)
+			unbindService(conn);
+		super.onDestroy();
+	}
+
+
 	protected class MainActivityHandler extends Handler {
 
 		@Override

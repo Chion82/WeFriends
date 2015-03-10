@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -16,6 +17,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 public class Messages {
 	protected Users users = null;
@@ -51,11 +53,15 @@ public class Messages {
 				JSONObject messageObj = jsonArray.getJSONObject(i);
 				ContentValues message = new ContentValues();
 				message.put("sender", URLDecoder.decode(messageObj.getString("sender"),"utf-8"));
+				message.put("sendernickname", URLDecoder.decode(messageObj.getString("sendernickname"),"utf-8"));
+				message.put("senderavatar", URLDecoder.decode(messageObj.getString("senderavatar"),"utf-8"));
 				message.put("messagetype",messageObj.getString("messagetype"));
 				message.put("chatgroup", URLDecoder.decode(messageObj.getString("chatgroup"),"utf-8"));
 				message.put("timestramp", messageObj.getLong("timestramp"));
 				message.put("message", URLDecoder.decode(messageObj.getString("message"),"utf-8"));
 				message.put("ishandled", 0);
+				message.put("notificationid", 0);
+				message.put("messageid", generateMessageId());
 				messageList.add(message);
 				db.insert("messagecache", "", message);
 			}
@@ -74,8 +80,39 @@ public class Messages {
 	
 	public List<ContentValues> getCachedMessages(String messageType, String sender, String chatGroup, int page) {
 		SQLiteDatabase db = database.getReadableDatabase();
-		Cursor cursor = db.query("messagecache", new String[]{"sender", "messagetype", "chatgroup", "timestramp", "message", "ishandled"} , "", new String[]{}, "", "", "timestramp DESC");
+		Cursor cursor = null;
+		String selectionStr = "";
+		boolean firstSelection = true;
+		if (messageType!="" || sender!="" || chatGroup!="")
+			selectionStr = " WHERE";
+		if (messageType!="")
+		{
+			selectionStr += (" messagetype='" + messageType + "'");
+			firstSelection = false;
+		}
+		if (sender!="")
+		{
+			if (!firstSelection)
+				selectionStr += " AND";
+			selectionStr += (" sender='" + sender + "'");
+			firstSelection = false;
+		}
+		if (chatGroup!="")
+		{
+			if (!firstSelection)
+				selectionStr += " AND";
+			selectionStr += (" chatgroup='" + chatGroup + "'");
+			firstSelection = false;
+		}
+		selectionStr += " ORDER BY timestramp DESC";
+		if (page!=0)
+			selectionStr += (" LIMIT " + page*15);
+		String sqlStr = "SELECT * FROM messagecache" + selectionStr;
+		Log.d("WeFriends","sql=" + sqlStr);
+		cursor = db.rawQuery(sqlStr, new String[]{});
+		
 		List<ContentValues> resultList = new ArrayList<ContentValues>();
+		
 		while (cursor.moveToNext()) {
 			ContentValues value = new ContentValues();
 			value.put("sender", cursor.getString(cursor.getColumnIndex("sender")));
@@ -84,22 +121,11 @@ public class Messages {
 			value.put("timestramp", cursor.getLong(cursor.getColumnIndex("timestramp")));
 			value.put("message", cursor.getString(cursor.getColumnIndex("message")));
 			value.put("ishandled", cursor.getInt(cursor.getColumnIndex("ishandled")));
-			
-			if (messageType!=null && (!messageType.equals("")) && messageType.equals(value.getAsString("messagetype")))
-				resultList.add(value);
-			else if (messageType==null || messageType.equals(""))
-				resultList.add(value);
-			
-			if (sender!=null && (!sender.equals("")) && sender.equals(value.getAsString("sender")))
-				resultList.add(value);
-			else if (sender==null || sender.equals(""))
-				resultList.add(value);
-			
-			if (chatGroup!=null && (!chatGroup.equals("")) && chatGroup.equals(value.getAsString("chatgroup")))
-				resultList.add(value);
-			else if (chatGroup==null || chatGroup.equals(""))
-				resultList.add(value);
-			
+			value.put("sendernickname", cursor.getString(cursor.getColumnIndex("sendernickname")));
+			value.put("senderavatar", cursor.getString(cursor.getColumnIndex("senderavatar")));
+			value.put("notificationid", cursor.getInt(cursor.getColumnIndex("notificationid")));
+			value.put("messageid", cursor.getString(cursor.getColumnIndex("messageid")));
+			resultList.add(value);
 		}
 		db.close();
 		
@@ -113,13 +139,25 @@ public class Messages {
 				resultList.remove(0);
 		}
 		
-		List<ContentValues> newList = new ArrayList<ContentValues>();
-		for (int i=0;i<15;i++) {
-			if (resultList.size() >= (i+1))
-				newList.add(resultList.get(i));
-		}
-		
-		return newList;
+		return resultList;
+	}
+	
+	public void bindNotification(String messageId, int notificationId) {
+		SQLiteDatabase db = database.getWritableDatabase();
+		db.execSQL("UPDATE messagecache SET notificationid=" + notificationId + " WHERE messageid='" + messageId + "'");
+		db.close();
 	}
 
+    public String generateMessageId()
+    {
+        String allChar = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    	int length = 32;
+	    StringBuffer sb = new StringBuffer();
+	    Random random = new Random();
+	    for (int i = 0; i < length; i++)
+	    {
+	    	sb.append(allChar.charAt(random.nextInt(allChar.length())));
+	    }
+	    return sb.toString();
+    }
 }

@@ -22,19 +22,25 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ExpandableListView;
+import android.widget.ExpandableListView.OnGroupClickListener;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import com.infinity.utils.*;
-import com.infinity.wefriends.apis.DataBaseHelper;
+import com.infinity.wefriends.apis.Messages;
 import com.infinity.wefriends.apis.Users;
 
 public class MainActivity extends ActionBarActivity {
 
 	public static final int MAIN_LOADALLONLINEDATA = 100;
+	public static final int MAIN_LOADONLINECONTACTLIST = 101;
+	public static final int SHOWTOAST =  102;
 
 	public int currentPage = NavBarButton.CHATS;
 	
@@ -47,12 +53,14 @@ public class MainActivity extends ActionBarActivity {
 	
 	public MainActivityHandler handler = new MainActivityHandler();
 	
-	
 	protected ViewPager mainViewPager = null;
 	protected View chatsView = null;
 	protected View friendsView = null;
 	protected View discoveryView = null;
 	protected View meView = null;
+	
+	protected AnimatedExpandableListView contactListView = null;
+	protected Users usersAPI = null;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -77,41 +85,134 @@ public class MainActivity extends ActionBarActivity {
 		
 		mainViewPager = (ViewPager)findViewById(R.id.main_view_pager);
 		mainViewPager.setAdapter(adapter);
-		mainViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-			
-			@Override
-			public void onPageSelected(int pageIndex) {
-				onPageChanged(pageIndex,false);
-				
-			}
-			
-			@Override
-			public void onPageScrolled(int arg0, float arg1, int arg2) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void onPageScrollStateChanged(int arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-		});
+		mainViewPager.setOnPageChangeListener(mainViewPagerListener);
 		
-		/*Call after initialization*/
 		asyncTask = new MainAsyncTask(this);
+		usersAPI = new Users(this);
+
+		
+		contactListView = (AnimatedExpandableListView)friendsView.findViewById(R.id.main_contact_list_view);
+		
+		/*Load Cached Data*/
+		loadCachedData();
+		
+		/*Load Online Data*/
+		/*Execute async tasks*/
+		/*Should be called after initialization*/
 		asyncTask.initCheckUserInfo();
 		
 	}
 	
 	public void loadAllOnlineData() {
 		Log.d("WeFriends","Loading All Data.");
-		Users users = new Users(this);
-		users.getAndSaveUserInfo();
-		users.getAndSaveFriendList();
+		Messages messages = new Messages(this);
+		messages.getAndSaveNewMessages();
+		asyncTask.loadOnlineFriendList();
+		//TODO
+		
+
 	}
 	
+	public void loadCachedData() {
+		List<ContentValues> contactList = usersAPI.getCachedFriendList();
+		if (contactList != null)
+		{
+			loadContactViewList(contactList);
+			
+		}
+		//TODO
+	}
+	
+	public void loadContactViewList(List<ContentValues> contactsInfo) {
+		ContactExpandableListAdapter contactListAdapter = new ContactExpandableListAdapter(this, contactsInfo);
+		//TODO : Update contact list with non-handled messages
+		contactListView.setAdapter(contactListAdapter);
+		contactListView.setOnGroupClickListener(new OnGroupClickListener() {
+			
+			@Override
+			public boolean onGroupClick(ExpandableListView parent, View v,
+					int groupPosition, long id) {
+				if (contactListView.isGroupExpanded(groupPosition)) {
+					contactListView.collapseGroupWithAnimation(groupPosition);
+				} else {
+					contactListView.expandGroupWithAnimation(groupPosition);
+				}
+				return true;
+			}
+		});
+		
+	}
+	
+	
+	protected class MainActivityHandler extends Handler {
 
+		@Override
+		public void handleMessage(Message msg) {
+			switch(msg.what) {
+			case MAIN_LOADALLONLINEDATA:
+				loadAllOnlineData();
+				break;
+			case MAIN_LOADONLINECONTACTLIST:
+				loadContactViewList((ArrayList<ContentValues>)(msg.getData().getParcelableArrayList("contactlist").get(0)));
+				break;
+			case SHOWTOAST:
+				Toast.makeText(MainActivity.this, msg.getData().getString("text"), Toast.LENGTH_SHORT).show();
+				break;
+			}
+			super.handleMessage(msg);
+		}
+		
+	}
+	
+	
+	/////////////////////////////UI Initialization///////////////////////////////////////
+	/////////////////////////Currently no active modification here/////////////////////////
+	/////////////////////////////////////////////////////////////////////////////////////
+	private ViewPager.OnPageChangeListener mainViewPagerListener = new ViewPager.OnPageChangeListener() {
+		
+		@Override
+		public void onPageSelected(int pageIndex) {
+			onPageChanged(pageIndex,false);
+		}
+		
+		@Override
+		public void onPageScrolled(int arg0, float arg1, int arg2) {
+			// TODO Auto-generated method stub
+			
+		}
+		
+		@Override
+		public void onPageScrollStateChanged(int arg0) {
+			// TODO Auto-generated method stub
+			
+		}
+	};
+	
+	protected void initNavBar() {
+		navBarChats = new NavBarButton(getApplicationContext(),NavBarButton.CHATS,this);
+		navBarContacts = new NavBarButton(getApplicationContext(),NavBarButton.CONTACTS,this);
+		navBarDiscovery = new NavBarButton(getApplicationContext(),NavBarButton.DISCOVERY,this);
+		navBarMe = new NavBarButton(getApplicationContext(),NavBarButton.ME,this);
+		
+		LinearLayout navGroupLayout = (LinearLayout)findViewById(R.id.nav_bar_group);
+		navGroupLayout.addView(navBarChats);
+		navGroupLayout.addView(navBarContacts);
+		navGroupLayout.addView(navBarDiscovery);
+		navGroupLayout.addView(navBarMe);
+		
+		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.MATCH_PARENT,1);
+		
+		navBarChats.setLayoutParams(params);
+		navBarContacts.setLayoutParams(params);
+		navBarDiscovery.setLayoutParams(params);
+		navBarMe.setLayoutParams(params);
+		
+		navBarChats.setGravity(Gravity.CENTER_HORIZONTAL);
+		navBarContacts.setGravity(Gravity.CENTER_HORIZONTAL);
+		navBarDiscovery.setGravity(Gravity.CENTER_HORIZONTAL);
+		navBarMe.setGravity(Gravity.CENTER_HORIZONTAL);
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.actionbar, menu);
@@ -147,44 +248,5 @@ public class MainActivity extends ActionBarActivity {
 				break;
 			}
 		}
-	}
-	
-	protected void initNavBar() {
-		navBarChats = new NavBarButton(getApplicationContext(),NavBarButton.CHATS,this);
-		navBarContacts = new NavBarButton(getApplicationContext(),NavBarButton.CONTACTS,this);
-		navBarDiscovery = new NavBarButton(getApplicationContext(),NavBarButton.DISCOVERY,this);
-		navBarMe = new NavBarButton(getApplicationContext(),NavBarButton.ME,this);
-		
-		LinearLayout navGroupLayout = (LinearLayout)findViewById(R.id.nav_bar_group);
-		navGroupLayout.addView(navBarChats);
-		navGroupLayout.addView(navBarContacts);
-		navGroupLayout.addView(navBarDiscovery);
-		navGroupLayout.addView(navBarMe);
-		
-		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.MATCH_PARENT,1);
-		
-		navBarChats.setLayoutParams(params);
-		navBarContacts.setLayoutParams(params);
-		navBarDiscovery.setLayoutParams(params);
-		navBarMe.setLayoutParams(params);
-		
-		navBarChats.setGravity(Gravity.CENTER_HORIZONTAL);
-		navBarContacts.setGravity(Gravity.CENTER_HORIZONTAL);
-		navBarDiscovery.setGravity(Gravity.CENTER_HORIZONTAL);
-		navBarMe.setGravity(Gravity.CENTER_HORIZONTAL);
-	}
-	
-	protected class MainActivityHandler extends Handler {
-
-		@Override
-		public void handleMessage(Message msg) {
-			switch(msg.what) {
-			case MAIN_LOADALLONLINEDATA:
-				loadAllOnlineData();
-				break;
-			}
-			super.handleMessage(msg);
-		}
-		
 	}
 }
