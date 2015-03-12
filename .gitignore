@@ -18,7 +18,5 @@ local.properties
 proguard/
 # Log Files
 *.log
-# .metadata
-/.metadata
 # .recommenders
 /.recommenders
