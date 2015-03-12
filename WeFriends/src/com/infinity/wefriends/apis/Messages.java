@@ -78,6 +78,19 @@ public class Messages {
 		return null;
 	}
 	
+	public List<ContentValues> getCachedNonHandledMessages() {
+		List<ContentValues> src = getCachedMessages("","","",0);
+		List<ContentValues> newList = new ArrayList<ContentValues>();
+		int messageCount = src.size();
+		for (int i=0;i<messageCount;i++) {
+			ContentValues contact = src.get(i);
+			if (contact.getAsInteger("ishandled").equals(0)) {
+				newList.add(src.get(i));
+			}
+		}
+		return newList;
+	}
+	
 	public List<ContentValues> getCachedMessages(String messageType, String sender, String chatGroup, int page) {
 		SQLiteDatabase db = database.getReadableDatabase();
 		Cursor cursor = null;
