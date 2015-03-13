@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import com.infinity.utils.HttpRequest;
 import com.infinity.wefriends.apis.Messages;
@@ -19,6 +20,7 @@ import android.app.Service;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -31,8 +33,10 @@ public class NotifierService extends Service {
 	
 	public static final String NEW_MESSAGE_ACTION = "WEFRIENDS_NEW_MESSAGES";
 	
-	public static final int SEND_NOTIFICATION = 100;
-	static public final int SHOWTOAST = 102;
+	static public final int SEND_NOTIFICATION = 100;
+	static public final int SHOW_TOAST = 102;
+	static public final int QUIT_SERVICE = 103;
+	
 	
 	protected boolean isBound = false;
 	protected boolean isFirstlyCreated = true;
@@ -48,12 +52,15 @@ public class NotifierService extends Service {
 	protected NotificationManager notificationManager = null;
 	protected int notificationId = 0;
 	
+	protected NotifierServiceReceiver receiver = null;
+	
+	protected boolean isReceiverRegistered = false;
+	
 	public ServiceHandler handler = new ServiceHandler();
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		if (serviceThread == null)
-		{
+		if (serviceThread == null) {
 			serviceThread = new RunningThread();
 			serviceThread.start();
 		}
@@ -76,6 +83,9 @@ public class NotifierService extends Service {
 		if (isFirstlyCreated)
 			this.startService(intent);
 		isFirstlyCreated = false;
+		receiver = new NotifierServiceReceiver(this);
+		registerReceiver(receiver, new IntentFilter("WEFRIENDS_RELOGIN"));
+		isReceiverRegistered = true;
 		return null;
 	}
 	
@@ -88,6 +98,7 @@ public class NotifierService extends Service {
 	class RunningThread extends Thread {
 		@Override
 		public void run() {
+			Log.d("WeFriends","Notifier Service running");
 			boolean connError;
 			byte[] buffer = new byte[10];
 			int byteReceived = 0;
@@ -101,6 +112,8 @@ public class NotifierService extends Service {
 					InputStream input = socket.getInputStream();
 					output.write(wefriendsId.getBytes());
 					while (true) {
+						if (exitSignal)
+							break;
 						if ((byteReceived = input.read(buffer)) <0) {
 							throw new IOException();
 						}
@@ -112,8 +125,7 @@ public class NotifierService extends Service {
 							Log.d("WeFriends","New Message Found");
 							newMessages = messagesAPI.getAndSaveNewMessages();
 							if (newMessages != null)
-								if (newMessages.size() > 0)
-								{
+								if (newMessages.size() > 0) {
 									Bundle bundle = new Bundle();
 									ArrayList list = new ArrayList();
 									list.add(newMessages);
@@ -138,7 +150,7 @@ public class NotifierService extends Service {
 						msgBundle.putString("text", "NotifierService:" + m_context.getString(R.string.connection_error));
 						Message msg = new Message();
 						msg.setData(msgBundle);
-						msg.what=NotifierService.SHOWTOAST;
+						msg.what=NotifierService.SHOW_TOAST;
 						handler.sendMessage(msg);
 						errorMsgSent = true;
 					}
@@ -155,9 +167,16 @@ public class NotifierService extends Service {
 		for (int i=0;i<messageCount;i++) {
 			ContentValues message = newMessages.get(i);
 			NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
-					.setSmallIcon(R.drawable.ic_launcher)
-					.setContentTitle(message.getAsString("sendernickname") + m_context.getString(R.string.notification_new_im))
-					.setContentText(message.getAsString("message"));
+					.setSmallIcon(R.drawable.ic_launcher);
+			if (message.getAsString("chatgroup").equals("")) {
+				builder.setContentTitle(message.getAsString("sendernickname") + m_context.getString(R.string.notification_new_im));
+				if (message.getAsString("messagetype").equals(Messages.MESSAGE_TEXT))
+					builder.setContentText(message.getAsString("message"));
+			} else {
+				builder.setContentTitle(message.getAsString("chatgroup"));
+				if (message.getAsString("messagetype").equals(Messages.MESSAGE_TEXT))
+					builder.setContentText(message.getAsString("sendernickname") + " : " + message.getAsString("message"));
+			}
 			Intent intent = new Intent();
 			intent.setClass(NotifierService.this, MainActivity.class);
 			PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
@@ -165,27 +184,42 @@ public class NotifierService extends Service {
 			Notification notification = builder.build();
 			notification.defaults |= Notification.DEFAULT_SOUND;
 			notification.defaults |= Notification.DEFAULT_VIBRATE;
+			
+			notificationId = new Random().nextInt(9999999);
 			notificationManager.notify(notificationId,notification);
 			
 			messagesAPI.bindNotification(message.getAsString("messageid"), notificationId);
-			notificationId++;
 		}
-		if (isBound) {
-			Intent intent = new Intent();
-			intent.setAction(NEW_MESSAGE_ACTION);
-			sendBroadcast(intent);
-		}
+
+		Intent intent = new Intent();
+		intent.setAction(NEW_MESSAGE_ACTION);
+		sendBroadcast(intent);
+		
 	}
 	
 	class ServiceHandler extends Handler {
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
-			case SHOWTOAST:
+			case SHOW_TOAST:
 				Toast.makeText(m_context, msg.getData().getString("text"), Toast.LENGTH_SHORT).show();
 				break;
 			case SEND_NOTIFICATION:
 				sendNotification((List<ContentValues>)(msg.getData().getParcelableArrayList("messages").get(0)));
+				break;
+			case QUIT_SERVICE:
+				if (isReceiverRegistered) {
+					//Must use try case otherwise throws exception noting receiver
+					//not registered. Reason unknown.
+					try {
+						unregisterReceiver(receiver);
+					} catch (IllegalArgumentException e) {
+						
+					}
+				}
+				exitSignal = true;
+				Log.d("WeFriends","Notifier service exiting.");
+				NotifierService.this.stopSelf();
 				break;
 			}
 			super.handleMessage(msg);

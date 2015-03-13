@@ -2,6 +2,7 @@ package com.infinity.wefriends.apis;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -11,12 +12,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.infinity.utils.HttpRequest;
+import com.infinity.wefriends.NotifierService;
 import com.infinity.wefriends.R;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.util.Log;
 
 public class Messages {
@@ -24,10 +28,90 @@ public class Messages {
 	protected Context m_context;
 	protected DatabaseHelper database = null;
 	
+	static public String MESSAGE_TEXT = "text";
+	static public String MESSAGE_IMAGE = "image";
+	static public String MESSAGE_FILE  = "file";
+	static public String MESSAGE_FRIEND_REQUEST = "friendrequest";
+	
 	public Messages(Context context) {
 		m_context = context;
 		users = new Users(context);
 		database = new DatabaseHelper(context,"wefriendsdb");
+	}
+	
+	static public String timestrampToString(long timestramp) {
+		if (new SimpleDateFormat("yyyy/MM/dd").format(timestramp*1000).equals(new SimpleDateFormat("yyyy/MM/dd").format(System.currentTimeMillis())))
+			return new SimpleDateFormat("HH:mm").format(timestramp*1000);
+		else
+			return new SimpleDateFormat("yyyy/MM/dd HH:mm").format(timestramp*1000);
+	}
+	
+	public List<ContentValues> updateContactListWithNewMessages(List<ContentValues> srcList) {
+		List<ContentValues> newList = new ArrayList<ContentValues>();
+		int contactCount = srcList.size();
+		for (int i=0;i<contactCount;i++) {
+			ContentValues contact = srcList.get(i);
+			int nonHandledMessageCount = getNonHandledMessageCountWith(contact.getAsString("wefriendsid"),"");
+			contact.put("newmessagecount", nonHandledMessageCount);
+			newList.add(contact);
+		}
+		return newList;
+	}
+	
+	public int getNonHandledMessageCountWith(String sender, String chatGroup) {	
+		try {
+			SQLiteDatabase db = database.getReadableDatabase();
+			Cursor cursor = db.rawQuery("SELECT * FROM messagecache WHERE sender='"+sender+"' AND chatgroup='" + chatGroup + "' AND ishandled=0 ORDER BY timestramp DESC", new String[]{});
+			if (!chatGroup.equals(""))
+				cursor = db.rawQuery("SELECT * FROM messagecache WHERE chatgroup='" + chatGroup + "' ORDER BY timestramp DESC", new String[]{});
+			int count = cursor.getCount();
+			db.close();
+			return count;
+		} catch (SQLException e) {
+			Log.e("WeFriends","SQLException at Messages.getNonHandledMessageCountWith");
+			Log.e("WeFriends",e.getMessage());
+			return 0;
+		}
+	}
+	
+	public String getLastMessageFrom(String sender, String chatGroup) {
+		try {
+			SQLiteDatabase db = database.getReadableDatabase();
+			Cursor cursor = db.rawQuery("SELECT * FROM messagecache WHERE sender='"+sender+"' AND chatgroup='" + chatGroup + "' ORDER BY timestramp DESC LIMIT 1", new String[]{});
+			if (!chatGroup.equals(""))
+				cursor = db.rawQuery("SELECT * FROM messagecache WHERE chatgroup='" + chatGroup + "' ORDER BY timestramp DESC LIMIT 1", new String[]{});
+			if (!cursor.moveToNext()) {
+				db.close();
+				return "";
+			}
+			String message = cursor.getString(cursor.getColumnIndex("message"));
+			db.close();
+			return message;
+		} catch (SQLException e) {
+			Log.e("WeFriends","SQLException at Messages.getLastMessageFrom");
+			Log.e("WeFriends",e.getMessage());
+			return "";
+		}
+	}
+	
+	public long getLastMessageTimestramp(String sender, String chatGroup) {
+		try {
+			SQLiteDatabase db = database.getReadableDatabase();
+			Cursor cursor = db.rawQuery("SELECT * FROM messagecache WHERE sender='"+sender+"' AND chatgroup='" + chatGroup + "' ORDER BY timestramp DESC LIMIT 1", new String[]{});
+			if (!chatGroup.equals(""))
+				cursor = db.rawQuery("SELECT * FROM messagecache WHERE chatgroup='" + chatGroup + "' ORDER BY timestramp DESC LIMIT 1", new String[]{});
+			if (!cursor.moveToNext()) {
+				db.close();
+				return -1;
+			}
+			long timestramp = cursor.getLong(cursor.getColumnIndex("timestramp"));
+			db.close();
+			return timestramp;
+		} catch (SQLException e) {
+			Log.e("WeFriends","SQLException at Messages.getLastMessageFrom");
+			Log.e("WeFriends",e.getMessage());
+			return -1;
+		}
 	}
 	
 	public List<ContentValues> getAndSaveNewMessages() {
@@ -78,13 +162,12 @@ public class Messages {
 		return null;
 	}
 	
-	public List<ContentValues> getCachedNonHandledMessages() {
-		List<ContentValues> src = getCachedMessages("","","",0);
+	public List<ContentValues> getCachedNonHandledMessages(String messageType, String sender, String chatGroup) {
+		List<ContentValues> src = getCachedMessages(messageType, sender, chatGroup,0);
 		List<ContentValues> newList = new ArrayList<ContentValues>();
-		int messageCount = src.size();
-		for (int i=0;i<messageCount;i++) {
-			ContentValues contact = src.get(i);
-			if (contact.getAsInteger("ishandled").equals(0)) {
+		int msgCnt = src.size();
+		for (int i=0;i<msgCnt;i++) {
+			if (src.get(i).getAsInteger("ishandled").equals(0)) {
 				newList.add(src.get(i));
 			}
 		}
@@ -173,4 +256,5 @@ public class Messages {
 	    }
 	    return sb.toString();
     }
+    
 }

@@ -16,6 +16,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
@@ -177,8 +178,10 @@ public class Users {
 	public List<ContentValues> getCachedFriendList() {
 		SQLiteDatabase db = database.getReadableDatabase();
 		Cursor cursor = db.query("friendscache", new String[]{"wefriendsid", "nickname", "avatar", "whatsup", "intro", "gender", "region", "collegeid", "friendgroup"}, "", new String[]{}, "", "", "");
-		if (cursor.getCount() == 0)
+		if (cursor.getCount() == 0) {
+			db.close();
 			return null;
+		}
 		List<ContentValues> list = new ArrayList<ContentValues>();
 		ContentValues friendInfo = null;
 		while (cursor.moveToNext()) {
@@ -194,6 +197,7 @@ public class Users {
 			friendInfo.put("friendgroup", cursor.getString(cursor.getColumnIndex("friendgroup")));
 			list.add(friendInfo);
 		}
+		db.close();
 		return list;
 	}
 	
@@ -231,6 +235,7 @@ public class Users {
 				info.put("friendgroup", URLDecoder.decode(person.getString("friendgroup"),"utf-8"));
 				db.insert("friendscache", "", info);
 				friendList.add(info);
+				updateMessagesAndChatsInfo(info,db);
 			}
 			db.close();
 			return friendList;
@@ -244,13 +249,29 @@ public class Users {
 		return null;
 	}
 	
+	public void updateMessagesAndChatsInfo(ContentValues info, SQLiteDatabase db) {
+		try {
+			db.execSQL("UPDATE messagecache SET sendernickname='"
+					+ info.getAsString("nickname") + "',senderavatar='"
+					+ info.getAsString("avatar") + "' WHERE sender='"
+					+ info.getAsString("wefriendsid") + "'");
+			db.execSQL("UPDATE chats SET contactnickname='"
+					+ info.getAsString("nickname") + "',contactavatar='"
+					+ info.getAsString("avatar") + "' WHERE contact='"
+					+ info.getAsString("wefriendsid") + "'");		
+		} catch (SQLException e) {
+			Log.e("WeFriends","SQL Exception at apis.Users.updateMessagesAndChatsInfo");
+			Log.e("WeFriends",e.getMessage());
+		}
+	}
+	
 	public String getCachedAccessToken() {
 		SQLiteDatabase db = database.getReadableDatabase();
 		Cursor cursor = db.query("usercache", new String[]{"accesstoken"}, "", new String[]{}, "", "", "", "1");
 		if (!cursor.moveToNext()) {
 			db.close();
 			broadcastReLoginAction();
-			return null;
+			return "";
 		}
 		String accessToken = cursor.getString(cursor.getColumnIndex("accesstoken"));
 		db.close();

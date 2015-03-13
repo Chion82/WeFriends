@@ -13,6 +13,7 @@ import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -38,6 +39,7 @@ import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import com.infinity.utils.*;
+import com.infinity.wefriends.apis.Chats;
 import com.infinity.wefriends.apis.Messages;
 import com.infinity.wefriends.apis.Users;
 
@@ -67,8 +69,15 @@ public class MainActivity extends ActionBarActivity {
 	
 	protected AnimatedExpandableListView contactListView = null;
 	protected Users usersAPI = null;
+	protected ListView chatList = null;
 	
 	protected boolean isNotifierServiceBound = false;
+	
+	protected ReloginReceiver reloginReceiver = null;
+	protected NewMessageReceiver newMessageReceiver = null;
+	
+	protected Messages messagesAPI = null;
+	protected Chats chatsAPI = null;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -96,48 +105,50 @@ public class MainActivity extends ActionBarActivity {
 		mainViewPager.setOnPageChangeListener(mainViewPagerListener);
 		
 		asyncTask = new MainAsyncTask(this);
+		
 		usersAPI = new Users(this);
-
+		messagesAPI = new Messages(this);
+		chatsAPI = new Chats(this);
 		
 		contactListView = (AnimatedExpandableListView)friendsView.findViewById(R.id.main_contact_list_view);
+		chatList = (ListView)chatsView.findViewById(R.id.main_chat_list);
 		
+		reloginReceiver = new ReloginReceiver(this);
+		reloginReceiver.restore();
+		registerReceiver(reloginReceiver, new IntentFilter("WEFRIENDS_RELOGIN"));
+		
+		
+		newMessageReceiver = new NewMessageReceiver(this);
+		registerReceiver(newMessageReceiver, new IntentFilter(NotifierService.NEW_MESSAGE_ACTION));
+		
+	}
+	
+	@Override
+	protected void onResume() {
+		/*Initial operations*/
+		reloginReceiver.restore();
 		/*Load Cached Data*/
 		loadCachedData();
 		
 		/*Load Online Data*/
+		loadAllOnlineData();
+		
+		/*Start Notifier Service*/
+		initNotifierService();
+		
+		
 		/*Execute async tasks*/
 		/*Should be called after initialization*/
-		asyncTask.initCheckUserInfo();
-		
+		//asyncTask.initCheckUserInfo();
+		super.onResume();
 	}
-	
-	public void initNotifierService() {
-		Intent intent = new Intent();
-		intent.setClass(this, NotifierService.class);
-		bindService(intent, conn, Context.BIND_AUTO_CREATE);
-		isNotifierServiceBound = true;
-	}
-	
-	ServiceConnection conn = new ServiceConnection() {
 
-		@Override
-		public void onServiceConnected(ComponentName name, IBinder service) {
-			// TODO Auto-generated method stub
-			
-		}
 
-		@Override
-		public void onServiceDisconnected(ComponentName name) {
-			// TODO Auto-generated method stub
-			
-		}
-		
-	};
 	
 	public void loadAllOnlineData() {
 		Log.d("WeFriends","Loading All Data.");
 		asyncTask.loadOnlineFriendList();
-		initNotifierService();
+		
 		//TODO
 		
 
@@ -145,17 +156,16 @@ public class MainActivity extends ActionBarActivity {
 	
 	public void loadCachedData() {
 		List<ContentValues> contactList = usersAPI.getCachedFriendList();
-		if (contactList != null)
-		{
+		if (contactList != null) {
 			loadContactViewList(contactList);
-			
 		}
+		updateChatList();
+		
 		//TODO
 	}
 	
 	public void loadContactViewList(List<ContentValues> contactsInfo) {
-		ContactExpandableListAdapter contactListAdapter = new ContactExpandableListAdapter(this, contactsInfo);
-		//TODO : Update contact list with non-handled messages
+		ContactExpandableListAdapter contactListAdapter = new ContactExpandableListAdapter(this, messagesAPI.updateContactListWithNewMessages(contactsInfo));
 		contactListView.setAdapter(contactListAdapter);
 		contactListView.setOnGroupClickListener(new OnGroupClickListener() {
 			
@@ -178,9 +188,24 @@ public class MainActivity extends ActionBarActivity {
 	protected void onDestroy() {
 		if (isNotifierServiceBound)
 			unbindService(conn);
+		unregisterReceiver(reloginReceiver);
+		unregisterReceiver(newMessageReceiver);
 		super.onDestroy();
 	}
-
+	
+	public void updateChatList() {
+		chatsAPI.importFromNewMessages(messagesAPI.getCachedNonHandledMessages("","",""));
+		List<ContentValues> list = chatsAPI.getChatList();
+		Log.d("test",list.size()+"");
+		chatList.setAdapter(new ChatListAdapter(this,list));
+	}
+	
+	public void initNotifierService() {
+		Intent intent = new Intent();
+		intent.setClass(this, NotifierService.class);
+		bindService(intent, conn, Context.BIND_AUTO_CREATE);
+		isNotifierServiceBound = true;
+	}
 
 	protected class MainActivityHandler extends Handler {
 
@@ -197,7 +222,7 @@ public class MainActivity extends ActionBarActivity {
 				Toast.makeText(MainActivity.this, msg.getData().getString("text"), Toast.LENGTH_SHORT).show();
 				break;
 			case MAIN_HANDLENEWMESSAGES:
-				
+				updateChatList();
 				break;
 			}
 			super.handleMessage(msg);
@@ -205,6 +230,21 @@ public class MainActivity extends ActionBarActivity {
 		
 	}
 	
+	ServiceConnection conn = new ServiceConnection() {
+
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+			// TODO Auto-generated method stub
+			
+		}
+		
+	};
 	
 	/////////////////////////////UI Initialization///////////////////////////////////////
 	/////////////////////////Currently no active modification here/////////////////////////

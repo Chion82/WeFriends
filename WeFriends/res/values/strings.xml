@@ -27,6 +27,7 @@
     <string name="nav_bar_me">我</string>
     
     <string name="notification_new_im">向你发送消息</string>
+    <string name="friend_request">好友请求</string>
     
 
 </resources>

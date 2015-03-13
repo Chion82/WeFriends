@@ -124,6 +124,12 @@ public class ContactExpandableListAdapter extends AnimatedExpandableListAdapter 
 		((OnlineImageView)contactInfoView.findViewById(R.id.contact_list_item_view_avatar)).asyncLoadOnlineImage("http://" + m_context.getString(R.string.server_host) + ":" + m_context.getString(R.string.server_web_service_port) + "/" + contactInfo.getAsString("avatar"),Environment.getExternalStorageDirectory()+"/wefriends/cache");
 		((TextView)contactInfoView.findViewById(R.id.contact_list_item_view_main_title)).setText(contactInfo.getAsString("nickname"));
 		((TextView)contactInfoView.findViewById(R.id.contact_list_item_view_subtitle)).setText(contactInfo.getAsString("whatsup"));
+		int newMessageCount = contactInfo.getAsInteger("newmessagecount");
+		if (newMessageCount>0) {
+			TextView notifier = (TextView)contactInfoView.findViewById(R.id.chat_item_notification);
+			notifier.setVisibility(View.VISIBLE);
+			notifier.setText(newMessageCount+"");
+		}
 		return contactInfoView;
 	}
 
