@@ -9,8 +9,8 @@
     android:background="@drawable/button_background_white" >
     
     <RelativeLayout 
-        android:layout_height="60dp"
-        android:layout_width="60dp"
+        android:layout_height="65dp"
+        android:layout_width="65dp"
         android:layout_marginRight="5dp" >
 	    <com.infinity.utils.OnlineImageView android:id="@+id/contact_list_item_view_avatar"
 				android:layout_height="match_parent"

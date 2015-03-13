@@ -10,7 +10,6 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
@@ -40,10 +39,7 @@ public class HttpRequest {
 		HttpGet request = new HttpGet(url);
 		
 		try {
-			DefaultHttpClient client = new DefaultHttpClient();
-			client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 60000);
-			client.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, 60000);
-			HttpResponse httpResponse = client.execute(request);
+			HttpResponse httpResponse = new DefaultHttpClient().execute(request);
 			if (httpResponse.getStatusLine().getStatusCode() != 200)
 				return HTTP_FAILED;
 			response.setString(EntityUtils.toString(httpResponse.getEntity()));
@@ -59,12 +55,8 @@ public class HttpRequest {
 		HttpPost request = new HttpPost(url);
 		
 		try {
-			DefaultHttpClient client = new DefaultHttpClient();
-			client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 60000);
-			client.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, 60000);
-			
 			request.setEntity(new UrlEncodedFormEntity(postFields, HTTP.UTF_8));
-			HttpResponse httpResponse = client.execute(request);
+			HttpResponse httpResponse = new DefaultHttpClient().execute(request);
 			if (httpResponse.getStatusLine().getStatusCode() != 200)
 				return HTTP_FAILED;
 			response.setString(EntityUtils.toString(httpResponse.getEntity()));
@@ -81,11 +73,7 @@ public class HttpRequest {
 		HttpGet request = new HttpGet(url);
 		
 		try {
-			DefaultHttpClient client = new DefaultHttpClient();
-			client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 60000);
-			client.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, 60000);
-			
-			HttpResponse httpResponse = client.execute(request);
+			HttpResponse httpResponse = new DefaultHttpClient().execute(request);
 			if (httpResponse.getStatusLine().getStatusCode() != 200)
 				return HTTP_FAILED;
 			byte[] buffer = EntityUtils.toByteArray(httpResponse.getEntity());

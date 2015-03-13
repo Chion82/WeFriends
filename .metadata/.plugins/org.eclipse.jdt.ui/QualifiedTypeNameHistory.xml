@@ -24,4 +24,5 @@
 <fullyQualifiedTypeName name="com.infinity.wefriends.R.id"/>
 <fullyQualifiedTypeName name="java.util.Random"/>
 <fullyQualifiedTypeName name="java.lang.IllegalArgumentException"/>
+<fullyQualifiedTypeName name="org.apache.http.params.CoreConnectionPNames"/>
 </qualifiedTypeNameHistroy>
