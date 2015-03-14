@@ -11,14 +11,15 @@
     <ImageView android:id="@+id/contact_list_group_toggle_icon"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
-        android:layout_width="15dp"
-        android:layout_height="15dp"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
         android:src="@drawable/ic_action_down" />
     
     <TextView android:id="@+id/contact_list_group_toggle_title"
         android:textColor="#7A7A7A"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:singleLine="true" />    
+        android:singleLine="true"
+        android:textSize="23sp" />    
 
 </LinearLayout>

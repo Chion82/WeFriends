@@ -39,7 +39,6 @@ public class NotifierService extends Service {
 	
 	
 	protected boolean isBound = false;
-	protected boolean isFirstlyCreated = true;
 	protected RunningThread serviceThread = null;
 	protected Socket socket = null;
 	protected Context m_context = null;
@@ -80,9 +79,7 @@ public class NotifierService extends Service {
 		accessToken = token;
 		wefriendsId = userInfo.getAsString("wefriendsid");
 		isBound = true;
-		if (isFirstlyCreated)
-			this.startService(intent);
-		isFirstlyCreated = false;
+		this.startService(intent);
 		receiver = new NotifierServiceReceiver(this);
 		registerReceiver(receiver, new IntentFilter("WEFRIENDS_RELOGIN"));
 		isReceiverRegistered = true;
@@ -155,8 +152,14 @@ public class NotifierService extends Service {
 						errorMsgSent = true;
 					}
 					e.printStackTrace();
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException e1) {
+						e1.printStackTrace();
+					}
 				}
 			} while (connError && (!exitSignal));
+			serviceThread = null;
 			super.run();
 		}
 	}
