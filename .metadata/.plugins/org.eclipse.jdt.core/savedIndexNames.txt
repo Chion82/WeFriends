@@ -1,6 +1,0 @@
-INDEX VERSION 1.127+/home/heapoverflow/WeFriends/.metadata/.plugins/org.eclipse.jdt.core
-994761711.index
-1270315800.index
-555703631.index
-636912888.index
-2698716352.index

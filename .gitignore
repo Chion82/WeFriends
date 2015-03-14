@@ -20,6 +20,8 @@ proguard/
 *.log
 # .recommenders
 /.recommenders
+# .metadata
+/.metadata
 # test projects
 /AndroidTest
 /Hello
