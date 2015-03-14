@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#DDDDDD" >
+    
+        
+    <ScrollView android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="50dp" >
+		<LinearLayout
+		    android:id="@+id/chat_message_list"
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+		    android:orientation="vertical" >
+		    
+		</LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:id="@+id/chat_bottom_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true"
+        android:background="#FFFFFF" >
+
+        <EditText
+            android:id="@+id/chat_message_edit_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="4"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp" >
+           
+        </EditText>
+		
+        <Button
+            android:id="@+id/chat_send_message_button"
+            android:layout_height="40dp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:background="@drawable/long_button_blue_background"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:text="@string/send" />
+		
+    </LinearLayout>
+    
+    <View
+        android:id="@+id/view1"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_above="@id/chat_bottom_bar"
+        android:background="#999999" />
+    
+</RelativeLayout>

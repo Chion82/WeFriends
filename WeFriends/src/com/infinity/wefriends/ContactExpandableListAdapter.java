@@ -8,6 +8,7 @@ import com.infinity.utils.OnlineImageView;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -119,7 +120,7 @@ public class ContactExpandableListAdapter extends AnimatedExpandableListAdapter 
 	@Override
 	public View getRealChildView(int groupPosition, int childPosition,
 			boolean isLastChild, View convertView, ViewGroup parent) {
-		ContentValues contactInfo = (ContentValues)getChild(groupPosition,childPosition);
+		final ContentValues contactInfo = (ContentValues)getChild(groupPosition,childPosition);
 		View contactInfoView = inflater.inflate(R.layout.contact_list_item_view, null);
 		((OnlineImageView)contactInfoView.findViewById(R.id.contact_list_item_view_avatar)).asyncLoadOnlineImage("http://" + m_context.getString(R.string.server_host) + ":" + m_context.getString(R.string.server_web_service_port) + "/" + contactInfo.getAsString("avatar"),Environment.getExternalStorageDirectory()+"/wefriends/cache");
 		((TextView)contactInfoView.findViewById(R.id.contact_list_item_view_main_title)).setText(contactInfo.getAsString("nickname"));
@@ -130,6 +131,18 @@ public class ContactExpandableListAdapter extends AnimatedExpandableListAdapter 
 			notifier.setVisibility(View.VISIBLE);
 			notifier.setText(newMessageCount+"");
 		}
+		contactInfoView.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent();
+				intent.putExtra("contactid", contactInfo.getAsString("wefriendsid"));
+				intent.putExtra("contactnickname", contactInfo.getAsString("nickname"));
+				intent.putExtra("contactavatar", contactInfo.getAsString("avatar"));
+				intent.setClass(m_context,ChatActivity.class);
+				m_context.startActivity(intent);
+			}
+		});
 		return contactInfoView;
 	}
 

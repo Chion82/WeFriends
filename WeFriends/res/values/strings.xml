@@ -19,15 +19,18 @@
     
     <string name="action_search">搜索</string>
     <string name="action_overflow">添加</string>
-    <string name="action_add_friend">添加聊友</string>
+    <string name="action_add_friend">找惟友</string>
     
     <string name="nav_bar_chats">消息</string>
-    <string name="nav_bar_contacts">我的聊友</string>
+    <string name="nav_bar_contacts">我的惟友</string>
     <string name="nav_bar_discovery">发现</string>
     <string name="nav_bar_me">我</string>
     
     <string name="notification_new_im">向你发送消息</string>
     <string name="friend_request">好友请求</string>
     
+    <string name="friend">惟友资料</string>
+    
+    <string name="send">发送</string>
 
 </resources>
