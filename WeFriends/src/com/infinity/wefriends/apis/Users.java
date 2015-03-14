@@ -133,6 +133,7 @@ public class Users {
 		values.put("region", cursor.getString(cursor.getColumnIndex("region")));
 		values.put("collegeid", cursor.getString(cursor.getColumnIndex("collegeid")));
 		values.put("whatsup", cursor.getString(cursor.getColumnIndex("whatsup")));
+		db.close();
 		return values;
 	}
 	

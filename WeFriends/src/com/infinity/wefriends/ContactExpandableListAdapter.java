@@ -5,6 +5,8 @@ import java.util.List;
 
 import com.infinity.utils.AnimatedExpandableListView.AnimatedExpandableListAdapter;
 import com.infinity.utils.OnlineImageView;
+import com.infinity.wefriends.apis.Chats;
+import com.infinity.wefriends.apis.Messages;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -24,6 +26,7 @@ public class ContactExpandableListAdapter extends AnimatedExpandableListAdapter 
 	protected List<ArrayList<ContentValues>> groupMemberList = null;
 	protected Context m_context = null;
 	protected LayoutInflater inflater = null;
+	protected Chats chatsAPI = null;
 	
 	public ContactExpandableListAdapter(Context context, List<ContentValues> values) {
 		m_context = context;
@@ -31,6 +34,7 @@ public class ContactExpandableListAdapter extends AnimatedExpandableListAdapter 
 		groupList = getGroupList();
 		groupMemberList = parseContactList();
 		inflater = LayoutInflater.from(context);
+		chatsAPI = new Chats(context);
 	}
 
 	@Override
@@ -141,6 +145,16 @@ public class ContactExpandableListAdapter extends AnimatedExpandableListAdapter 
 				intent.putExtra("contactavatar", contactInfo.getAsString("avatar"));
 				intent.setClass(m_context,ChatActivity.class);
 				m_context.startActivity(intent);
+				if (!chatsAPI.isChatFound(contactInfo.getAsString("wefriendsid"), "")) {
+					ContentValues chatInfo = new ContentValues();
+					chatInfo.put("contact", contactInfo.getAsString("wefriendsid"));
+					chatInfo.put("chatgroup", "");
+					chatInfo.put("contactnickname", contactInfo.getAsString("nickname"));
+					chatInfo.put("contactavatar", contactInfo.getAsString("avatar"));
+					chatInfo.put("chattype", Messages.MESSAGE_TEXT);
+					chatInfo.put("addtime", System.currentTimeMillis()/1000);
+					chatsAPI.addChat(chatInfo);
+				}
 			}
 		});
 		return contactInfoView;

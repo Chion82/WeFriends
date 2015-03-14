@@ -16,6 +16,8 @@
 	    <com.infinity.utils.OnlineImageView android:id="@+id/contact_list_item_view_avatar"
 				android:layout_height="match_parent"
 				android:layout_width="match_parent"
+				android:layout_marginTop="5dp"
+				android:layout_marginBottom="5dp"
 				android:layout_marginLeft="5dp"
 				android:layout_marginRight="5dp"
 				android:layout_centerInParent="true" />

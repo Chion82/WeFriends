@@ -37,16 +37,35 @@ public class Chats {
 		return list;
 	}
 	
+	public boolean isChatFound(String contact, String chatGroup) {
+		SQLiteDatabase db = database.getReadableDatabase();
+		Cursor cursor = null;
+		boolean result = false;
+		try {
+			if (!chatGroup.equals(""))
+				cursor = db.rawQuery("SELECT * FROM chats WHERE chatgroup='"+chatGroup+"'", new String[]{});
+			else
+				cursor = db.rawQuery("SELECT * FROM chats WHERE chatgroup='' AND contact='"+contact+"'", new String[]{});
+			
+			if (cursor.getCount()>0)
+				result = true;
+		} catch (SQLException e) {
+			Log.e("WeFriends","SQL Exception at Chats.isChatFound");
+			Log.e("WeFriends",e.getMessage());
+		}
+		db.close();
+		return result;
+	}
+	
 	public void addChat(ContentValues chatInfo) {
 		SQLiteDatabase db = database.getWritableDatabase();
 		String contact = chatInfo.getAsString("contact");
 		String chatGroup = chatInfo.getAsString("chatgroup");
 		try {
-			db.execSQL("DELETE FROM chats WHERE contact='" 
-					+ contact + "' AND chatgroup='"
-					+ chatGroup + "'");
 			if (!chatGroup.equals(""))
-				db.execSQL("DELETE FROM chats WHERE chatgroup='" + chatGroup + "'");				
+				db.execSQL("DELETE FROM chats WHERE chatgroup='" + chatGroup + "'");
+			else
+				db.execSQL("DELETE FROM chats WHERE contact='"+ contact + "' AND chatgroup=''");
 		} catch (SQLException e) {
 			Log.e("WeFriends","SQL Exception at apis.Chats.addChat");
 			Log.e("WeFriends",e.getMessage());

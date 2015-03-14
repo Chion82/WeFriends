@@ -62,11 +62,14 @@ public class Messages {
 	public int getNonHandledMessageCountWith(String sender, String chatGroup) {	
 		try {
 			SQLiteDatabase db = database.getReadableDatabase();
-			Cursor cursor = db.rawQuery("SELECT * FROM messagecache WHERE sender='"+sender+"' AND chatgroup='" + chatGroup + "' AND ishandled=0 ORDER BY timestramp DESC", new String[]{});
-			if (!chatGroup.equals(""))
-				cursor = db.rawQuery("SELECT * FROM messagecache WHERE chatgroup='" + chatGroup + "' ORDER BY timestramp DESC", new String[]{});
+			Cursor cursor = null;
+			if (chatGroup.equals(""))
+				cursor = db.rawQuery("SELECT * FROM messagecache WHERE sender='"+sender+"' AND chatgroup='' AND ishandled=0 ORDER BY timestramp DESC", new String[]{});
+			else
+				cursor = db.rawQuery("SELECT * FROM messagecache WHERE chatgroup='" + chatGroup + "' AND ishandled=0 ORDER BY timestramp DESC", new String[]{});
 			int count = cursor.getCount();
 			db.close();
+			Log.d("test","sender="+sender+";chatgroup="+chatGroup+";count="+count);
 			return count;
 		} catch (SQLException e) {
 			Log.e("WeFriends","SQLException at Messages.getNonHandledMessageCountWith");
@@ -181,33 +184,35 @@ public class Messages {
 		Cursor cursor = null;
 		String selectionStr = "";
 		boolean firstSelection = true;
-		if (messageType!="" || sender!="" || chatGroup!="")
-			selectionStr = " WHERE";
-		if (messageType!="")
-		{
+		selectionStr = " WHERE";
+		if (!messageType.equals("")) {
 			selectionStr += (" messagetype='" + messageType + "'");
 			firstSelection = false;
 		}
-		if (sender!="")
-		{
+		if (!sender.equals("")) {
 			if (!firstSelection)
 				selectionStr += " AND";
 			selectionStr += (" sender='" + sender + "'");
 			firstSelection = false;
 		}
-		if (chatGroup!="")
-		{
-			if (!firstSelection)
-				selectionStr += " AND";
-			selectionStr += (" chatgroup='" + chatGroup + "'");
-			firstSelection = false;
-		}
+
+		if (!firstSelection)
+			selectionStr += " AND";
+		selectionStr += (" chatgroup='" + chatGroup + "'");
+		firstSelection = false;
+		
 		selectionStr += " ORDER BY timestramp DESC";
 		if (page!=0)
 			selectionStr += (" LIMIT " + page*15);
 		String sqlStr = "SELECT * FROM messagecache" + selectionStr;
 		//Log.d("WeFriends","sql=" + sqlStr);
-		cursor = db.rawQuery(sqlStr, new String[]{});
+		try {
+			cursor = db.rawQuery(sqlStr, new String[]{});
+		} catch (SQLException e) {
+			Log.e("WeFriends","SQL Exception at Messages.getCachedMessages");
+			Log.e("WeFriends",e.getMessage());
+			return new ArrayList<ContentValues>();
+		}
 		
 		List<ContentValues> resultList = new ArrayList<ContentValues>();
 		
@@ -246,8 +251,7 @@ public class Messages {
 		db.close();
 	}
 
-    public String generateMessageId()
-    {
+    public String generateMessageId() {
         String allChar = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     	int length = 32;
 	    StringBuffer sb = new StringBuffer();
@@ -257,6 +261,21 @@ public class Messages {
 	    	sb.append(allChar.charAt(random.nextInt(allChar.length())));
 	    }
 	    return sb.toString();
+    }
+    
+    public void markMessagesAsRead(String contact, String chatGroup) {
+    	SQLiteDatabase db = database.getWritableDatabase();
+    	try {
+	    	if (chatGroup.equals("")) {
+	    		db.execSQL("UPDATE messagecache SET ishandled=1 WHERE chatgroup='' AND sender='" + contact + "'");
+	    	} else {
+	    		db.execSQL("UPDATE messagecache SET ishandled=1 WHERE chatgroup='" + chatGroup + "'");
+	    	}
+    	} catch (SQLException e) {
+			Log.e("WeFriends","SQLException at Messages.markMessagesAsRead");
+			Log.e("WeFriends",e.getMessage());
+    	}
+    	db.close();
     }
     
 }

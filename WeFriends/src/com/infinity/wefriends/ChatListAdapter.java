@@ -7,6 +7,7 @@ import com.infinity.wefriends.apis.Messages;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -46,7 +47,7 @@ public class ChatListAdapter extends BaseAdapter {
 
 	@Override
 	public View getView(int pos, View arg1, ViewGroup arg2) {
-		ContentValues chatInfo = chatList.get(pos);
+		final ContentValues chatInfo = chatList.get(pos);
 		View itemView = inflater.inflate(R.layout.contact_list_item_view, null);
 		TextView mainTitle = (TextView)itemView.findViewById(R.id.contact_list_item_view_main_title);
 		TextView subtitle = (TextView)itemView.findViewById(R.id.contact_list_item_view_subtitle);
@@ -83,6 +84,20 @@ public class ChatListAdapter extends BaseAdapter {
 		if (lastMessageTime>0) {
 			((TextView)itemView.findViewById(R.id.contact_list_item_view_time)).setText(Messages.timestrampToString(lastMessageTime));
 		}
+		
+		itemView.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent();
+				intent.putExtra("contactid", chatInfo.getAsString("contact"));
+				intent.putExtra("contactnickname", chatInfo.getAsString("contactnickname"));
+				intent.putExtra("contactavatar", chatInfo.getAsString("contactavatar"));
+				intent.putExtra("chatgroup", chatInfo.getAsString("chatgroup"));
+				intent.setClass(m_context, ChatActivity.class);
+				m_context.startActivity(intent);
+			}
+		});
 		
 		return itemView;
 	}
