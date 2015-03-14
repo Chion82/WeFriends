@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="right"
-    android:layout_marginTop="7dp"  >    
+    android:paddingTop="10dp"  >    
     
 	<LinearLayout android:id="@+id/chat_message_container_view_me"
 	    android:layout_height="wrap_content"

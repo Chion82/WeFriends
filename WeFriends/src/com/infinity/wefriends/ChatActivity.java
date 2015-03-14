@@ -8,6 +8,7 @@ import com.infinity.wefriends.apis.Users;
 
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
@@ -18,24 +19,27 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 public class ChatActivity extends ActionBarActivity {
 	
-	protected String contactId = "";
+	public String contactId = "";
 	protected String contactNickname = "";
 	protected String contactAvatar = "";
-	protected String chatGroup = "";
+	public String chatGroup = "";
 	protected String userId = "";
 	
 	protected Users usersAPI = null;
-	protected Messages messagesAPI = null;
+	public Messages messagesAPI = null;
 	protected ContentValues userInfo = null;
 	
 	protected LinearLayout messageListLayout = null;
 	protected long lastMessageTimestramp = System.currentTimeMillis()/1000;
 	
 	protected int currentPage = 0;
+	
+	protected ChatMessageReceiver chatMessageReceiver = null;
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -84,6 +88,9 @@ public class ChatActivity extends ActionBarActivity {
 		
 		loadHistory();
 		messagesAPI.markMessagesAsRead(contactId, chatGroup);
+		
+		chatMessageReceiver = new ChatMessageReceiver(this);
+		registerReceiver(chatMessageReceiver, new IntentFilter(NotifierService.NEW_MESSAGE_ACTION));
 	}
 
 	@Override
@@ -92,7 +99,7 @@ public class ChatActivity extends ActionBarActivity {
 		return super.onSupportNavigateUp();
 	}
 	
-	protected void loadHistory() {
+	public void loadHistory() {
 		List<ContentValues> messageHistoryList = null;
 		if (!chatGroup.equals(""))
 			messageHistoryList = messagesAPI.getCachedMessages("", "", chatGroup, currentPage+1);
@@ -106,7 +113,7 @@ public class ChatActivity extends ActionBarActivity {
 		}
 	}
 	
-	protected void addMessageToView(ContentValues message, boolean addToBottom) {
+	public void addMessageToView(ContentValues message, boolean addToBottom) {
 		View messageView = null;
 		LinearLayout messageContainerView = null;
 		if (message.getAsString("messagetype").equals(Messages.MESSAGE_FRIEND_REQUEST))
@@ -135,6 +142,7 @@ public class ChatActivity extends ActionBarActivity {
 			if (timeView!=null)
 				messageListLayout.addView(timeView);
 			messageListLayout.addView(messageView);
+			((ScrollView)findViewById(R.id.chat_message_scroll_view)).fullScroll(ScrollView.FOCUS_DOWN);
 		} else {
 			messageListLayout.addView(messageView,0);
 			if (timeView!=null)
@@ -143,6 +151,12 @@ public class ChatActivity extends ActionBarActivity {
 		lastMessageTimestramp = message.getAsLong("timestramp");
 	}
 	
+	@Override
+	protected void onDestroy() {
+		unregisterReceiver(chatMessageReceiver);
+		super.onDestroy();
+	}
+
 	protected View getMessageView(ContentValues message) {
 		String messageType = message.getAsString("messagetype");
 		if (messageType.equals(Messages.MESSAGE_TEXT)) {

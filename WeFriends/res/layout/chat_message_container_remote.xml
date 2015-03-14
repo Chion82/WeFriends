@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:layout_marginTop="7dp" >
+    android:paddingTop="10dp" >
     
     <com.infinity.utils.OnlineImageView android:id="@+id/chat_message_avatar_remote"
 			android:layout_height="40dp"
