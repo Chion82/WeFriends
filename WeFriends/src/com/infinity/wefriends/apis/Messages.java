@@ -11,6 +11,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.infinity.utils.Encrytor;
 import com.infinity.utils.HttpRequest;
 import com.infinity.wefriends.NotifierService;
 import com.infinity.wefriends.R;
@@ -136,13 +137,14 @@ public class Messages {
 			for (int i=0;i<messageCount;i++) {
 				JSONObject messageObj = jsonArray.getJSONObject(i);
 				ContentValues message = new ContentValues();
-				message.put("sender", URLDecoder.decode(messageObj.getString("sender"),"utf-8"));
+				String sender = URLDecoder.decode(messageObj.getString("sender"),"utf-8");
+				message.put("sender", sender);
 				message.put("sendernickname", URLDecoder.decode(messageObj.getString("sendernickname"),"utf-8"));
 				message.put("senderavatar", URLDecoder.decode(messageObj.getString("senderavatar"),"utf-8"));
 				message.put("messagetype",messageObj.getString("messagetype"));
 				message.put("chatgroup", URLDecoder.decode(messageObj.getString("chatgroup"),"utf-8"));
 				message.put("timestramp", messageObj.getLong("timestramp"));
-				message.put("message", URLDecoder.decode(messageObj.getString("message"),"utf-8"));
+				message.put("message", Encrytor.autoDecrypt(URLDecoder.decode(messageObj.getString("message"),"utf-8"),sender));
 				message.put("ishandled", 0);
 				message.put("notificationid", 0);
 				message.put("messageid", generateMessageId());
@@ -204,7 +206,7 @@ public class Messages {
 		if (page!=0)
 			selectionStr += (" LIMIT " + page*15);
 		String sqlStr = "SELECT * FROM messagecache" + selectionStr;
-		Log.d("WeFriends","sql=" + sqlStr);
+		//Log.d("WeFriends","sql=" + sqlStr);
 		cursor = db.rawQuery(sqlStr, new String[]{});
 		
 		List<ContentValues> resultList = new ArrayList<ContentValues>();

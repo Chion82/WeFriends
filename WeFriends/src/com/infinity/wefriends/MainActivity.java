@@ -79,6 +79,17 @@ public class MainActivity extends ActionBarActivity {
 	protected Messages messagesAPI = null;
 	protected Chats chatsAPI = null;
 	
+	
+	public void test() {	
+		//This method is for testing Android or Java functions.
+		//Automatically called at onCreate()
+		//Comment out all codes in this method when completing test.
+		/*Log.d("WeFriendsTest","decoderesult = " + Encrytor.autoDecrypt("9XxTqkZvTOzHvflXh+wVTQ==", "testuser"));
+		String encryptedStr = Encrytor.autoEncrypt("Screw U guys, I'm going home.", "testuser");
+		Log.d("WeFriendsTest","encoded = " + encryptedStr);
+		Log.d("WeFriendsTest","encoded = " + Encrytor.autoDecrypt(encryptedStr,"testuser"));*/
+	}
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -120,6 +131,8 @@ public class MainActivity extends ActionBarActivity {
 		
 		newMessageReceiver = new NewMessageReceiver(this);
 		registerReceiver(newMessageReceiver, new IntentFilter(NotifierService.NEW_MESSAGE_ACTION));
+		
+		test();
 		
 	}
 	

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     
-    <string name="server_host">192.168.1.100</string>
+    <string name="server_host">192.168.1.105</string>
     <string name="server_web_service_port">8000</string>
     <string name="server_notifier_port">38700</string>
 
-    <string name="app_name">友趣聊</string>
+    <string name="app_name">惟友</string>
     <string name="hello_world">世界你好！</string>
     <string name="action_settings">设置</string>
     

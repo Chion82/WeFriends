@@ -77,7 +77,7 @@ public class Users {
 		String requestURL = "http://" + m_context.getString(R.string.server_host) + ":" + m_context.getString(R.string.server_web_service_port) + "/users/login";
 		List<NameValuePair> postFields = new ArrayList<NameValuePair>();
 		postFields.add(new BasicNameValuePair("phone",phone));
-		postFields.add(new BasicNameValuePair("password",password));
+		postFields.add(new BasicNameValuePair("password",Md5.md5(password).substring(0,16)));
 		if (HttpRequest.post(requestURL, postFields, response) == HttpRequest.HTTP_FAILED)
 			return CONNECTION_ERROR;
 		try {
