@@ -1,5 +1,6 @@
 package com.infinity.wefriends;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.infinity.utils.OnlineImageView;
@@ -12,17 +13,28 @@ import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
 public class ChatActivity extends ActionBarActivity {
+	
+	static final public int SCROLL_TO_BOTTOM = 100;
+	static final public int LOAD_HISTORY = 101;
+	static final public int HISTORY_LOADING_FINISHED = 102;
 	
 	public String contactId = "";
 	protected String contactNickname = "";
@@ -33,13 +45,22 @@ public class ChatActivity extends ActionBarActivity {
 	protected Users usersAPI = null;
 	public Messages messagesAPI = null;
 	protected ContentValues userInfo = null;
+	protected ChatActivityAsyncTask asyncTask = null;
 	
 	protected LinearLayout messageListLayout = null;
 	protected long lastMessageTimestramp = System.currentTimeMillis()/1000;
 	
 	protected int currentPage = 0;
 	
+	protected boolean init = true;
+	
 	protected ChatMessageReceiver chatMessageReceiver = null;
+	
+	public ChatActivityHandler handler = new ChatActivityHandler();
+	
+	ScrollView scrollList = null;
+	
+	List<String> LoadedMessages = new ArrayList<String>();
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -63,6 +84,7 @@ public class ChatActivity extends ActionBarActivity {
 		
 		usersAPI = new Users(this);
 		messagesAPI = new Messages(this);
+		asyncTask = new ChatActivityAsyncTask(this);
 		
 		userInfo = usersAPI.getCachedUserInfo();
 		if (userInfo!=null) {
@@ -84,13 +106,18 @@ public class ChatActivity extends ActionBarActivity {
 		if (!chatGroup.equals(""))
 			setTitle(chatGroup);
 		
+		
 		messageListLayout = (LinearLayout)findViewById(R.id.chat_message_list);
 		
-		loadHistory();
+		handler.sendEmptyMessage(LOAD_HISTORY);
 		messagesAPI.markMessagesAsRead(contactId, chatGroup);
 		
 		chatMessageReceiver = new ChatMessageReceiver(this);
 		registerReceiver(chatMessageReceiver, new IntentFilter(NotifierService.NEW_MESSAGE_ACTION));
+		
+		scrollList = (ScrollView)findViewById(R.id.chat_message_scroll_view);
+		scrollList.setOnTouchListener(new ScrollViewListener());	
+		
 	}
 
 	@Override
@@ -99,7 +126,14 @@ public class ChatActivity extends ActionBarActivity {
 		return super.onSupportNavigateUp();
 	}
 	
-	public void loadHistory() {
+	public void loadHistory(List<ContentValues> history) {
+		int count = history.size();
+		for (int i=0;i<count;i++) {
+			addMessageToView(history.get(i),false);
+		}
+	}
+	
+	public List<ContentValues> getHistory() {
 		List<ContentValues> messageHistoryList = null;
 		if (!chatGroup.equals(""))
 			messageHistoryList = messagesAPI.getCachedMessages("", "", chatGroup, currentPage+1);
@@ -107,15 +141,14 @@ public class ChatActivity extends ActionBarActivity {
 			messageHistoryList = messagesAPI.getCachedMessages("", contactId, "", currentPage+1);
 		if (messageHistoryList.size()>0)
 			currentPage++;
-		int count = messageHistoryList.size();
-		for (int i=0;i<count;i++) {
-			addMessageToView(messageHistoryList.get(i),false);
-		}
+		return messageHistoryList;		
 	}
 	
 	public void addMessageToView(ContentValues message, boolean addToBottom) {
 		View messageView = null;
 		LinearLayout messageContainerView = null;
+		if (isMessageLoaded(message))
+			return;
 		if (message.getAsString("messagetype").equals(Messages.MESSAGE_FRIEND_REQUEST))
 			return;
 		if (!message.getAsString("sender").equals(userId)) {
@@ -142,13 +175,22 @@ public class ChatActivity extends ActionBarActivity {
 			if (timeView!=null)
 				messageListLayout.addView(timeView);
 			messageListLayout.addView(messageView);
-			((ScrollView)findViewById(R.id.chat_message_scroll_view)).fullScroll(ScrollView.FOCUS_DOWN);
+			ChatActivity.this.handler.sendEmptyMessage(SCROLL_TO_BOTTOM);
 		} else {
 			messageListLayout.addView(messageView,0);
 			if (timeView!=null)
 				messageListLayout.addView(timeView,0);
 		}
 		lastMessageTimestramp = message.getAsLong("timestramp");
+		LoadedMessages.add(message.getAsString("messageid"));
+	}
+	
+	protected boolean isMessageLoaded(ContentValues message) {
+		int count = LoadedMessages.size();
+		for (int i=0;i<count;i++)
+			if (LoadedMessages.get(i).equals(message.getAsString("messageid")))
+				return true;
+		return false;
 	}
 	
 	@Override
@@ -171,6 +213,63 @@ public class ChatActivity extends ActionBarActivity {
 		}
 		//TODO : add view for other message types
 		return new TextView(this);
+	}
+	
+	class ChatActivityHandler extends Handler {
+
+		@Override
+		public void handleMessage(Message msg) {
+			switch(msg.what) {
+			case SCROLL_TO_BOTTOM:
+			    handler.post(new Runnable() {  
+			        @Override  
+			        public void run() {
+			            scrollList.fullScroll(ScrollView.FOCUS_DOWN); 
+			        }  
+			    });
+			    break;
+			case LOAD_HISTORY:
+				asyncTask.loadMessageHistory();
+				((ProgressBar)findViewById(R.id.chat_progress_bar)).setVisibility(View.VISIBLE);
+				setScrollViewMarginTop(25);
+				break;
+			case HISTORY_LOADING_FINISHED:
+				loadHistory((List<ContentValues>)(msg.getData().getParcelableArrayList("history").get(0)));
+				((ProgressBar)findViewById(R.id.chat_progress_bar)).setVisibility(View.GONE);
+				setScrollViewMarginTop(0);
+				if (init) {
+					ChatActivity.this.handler.sendEmptyMessage(SCROLL_TO_BOTTOM);
+					init = false;
+				}
+				break;
+			}
+			super.handleMessage(msg);
+		}
+		
+	}
+	
+	public void setScrollViewMarginTop(int marginTop) {
+		ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams)scrollList.getLayoutParams();
+		params.setMargins(0, marginTop, 0, 50);
+		scrollList.setLayoutParams(params);
+	}
+	
+	class ScrollViewListener implements View.OnTouchListener {
+		float initPos = 0;
+		boolean isPressed = false;
+		@Override
+		public boolean onTouch(View v, MotionEvent event) {
+			if (event.getAction()==MotionEvent.ACTION_DOWN) {
+				initPos = event.getY();
+				isPressed = true;
+			}
+			if (event.getAction()==MotionEvent.ACTION_UP && scrollList.getScrollY()==0 && (event.getY()-initPos>20) && isPressed) {
+				handler.sendEmptyMessage(LOAD_HISTORY);
+				isPressed = false;
+			}
+			return false;
+		}
+		
 	}
 
 }

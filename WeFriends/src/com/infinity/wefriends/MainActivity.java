@@ -207,7 +207,7 @@ public class MainActivity extends ActionBarActivity {
 	}
 	
 	public void updateChatList() {
-		chatsAPI.importFromNewMessages(messagesAPI.getCachedNonHandledMessages("","",""));
+		chatsAPI.importFromNewMessages(messagesAPI.getAllCachedNonHandledMessage());
 		List<ContentValues> list = chatsAPI.getChatList();
 		Log.d("test",list.size()+"");
 		chatList.setAdapter(new ChatListAdapter(this,list));

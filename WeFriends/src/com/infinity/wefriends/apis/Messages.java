@@ -69,7 +69,6 @@ public class Messages {
 				cursor = db.rawQuery("SELECT * FROM messagecache WHERE chatgroup='" + chatGroup + "' AND ishandled=0 ORDER BY timestramp DESC", new String[]{});
 			int count = cursor.getCount();
 			db.close();
-			Log.d("test","sender="+sender+";chatgroup="+chatGroup+";count="+count);
 			return count;
 		} catch (SQLException e) {
 			Log.e("WeFriends","SQLException at Messages.getNonHandledMessageCountWith");
@@ -78,9 +77,37 @@ public class Messages {
 		}
 	}
 	
-	public String getLastMessageFrom(String sender, String chatGroup) {
+	public List<ContentValues> getAllCachedNonHandledMessage() {	
+		List<ContentValues> resultList = new ArrayList<ContentValues>();
+		SQLiteDatabase db = database.getReadableDatabase();
 		try {
-			SQLiteDatabase db = database.getReadableDatabase();
+			Cursor cursor = db.rawQuery("SELECT * FROM messagecache WHERE ishandled=0 ORDER BY timestramp DESC", new String[]{});
+			while (cursor.moveToNext()) {
+				ContentValues value = new ContentValues();
+				value.put("sender", cursor.getString(cursor.getColumnIndex("sender")));
+				value.put("messagetype", cursor.getString(cursor.getColumnIndex("messagetype")));
+				value.put("chatgroup", cursor.getString(cursor.getColumnIndex("chatgroup")));
+				value.put("timestramp", cursor.getLong(cursor.getColumnIndex("timestramp")));
+				value.put("message", cursor.getString(cursor.getColumnIndex("message")));
+				value.put("ishandled", cursor.getInt(cursor.getColumnIndex("ishandled")));
+				value.put("sendernickname", cursor.getString(cursor.getColumnIndex("sendernickname")));
+				value.put("senderavatar", cursor.getString(cursor.getColumnIndex("senderavatar")));
+				value.put("notificationid", cursor.getInt(cursor.getColumnIndex("notificationid")));
+				value.put("messageid", cursor.getString(cursor.getColumnIndex("messageid")));
+				resultList.add(value);
+			}
+			
+		} catch (SQLException e) {
+			Log.e("WeFriends","SQLException at Messages.getNonHandledMessageCountWith");
+			Log.e("WeFriends",e.getMessage());
+		}
+		db.close();
+		return resultList;
+	}
+	
+	public String getLastMessageFrom(String sender, String chatGroup) {
+		SQLiteDatabase db = database.getReadableDatabase();
+		try {
 			Cursor cursor = db.rawQuery("SELECT * FROM messagecache WHERE sender='"+sender+"' AND chatgroup='" + chatGroup + "' ORDER BY timestramp DESC LIMIT 1", new String[]{});
 			if (!chatGroup.equals(""))
 				cursor = db.rawQuery("SELECT * FROM messagecache WHERE chatgroup='" + chatGroup + "' ORDER BY timestramp DESC LIMIT 1", new String[]{});
@@ -92,6 +119,7 @@ public class Messages {
 			db.close();
 			return message;
 		} catch (SQLException e) {
+			db.close();
 			Log.e("WeFriends","SQLException at Messages.getLastMessageFrom");
 			Log.e("WeFriends",e.getMessage());
 			return "";
@@ -99,8 +127,8 @@ public class Messages {
 	}
 	
 	public long getLastMessageTimestramp(String sender, String chatGroup) {
+		SQLiteDatabase db = database.getReadableDatabase();
 		try {
-			SQLiteDatabase db = database.getReadableDatabase();
 			Cursor cursor = db.rawQuery("SELECT * FROM messagecache WHERE sender='"+sender+"' AND chatgroup='" + chatGroup + "' ORDER BY timestramp DESC LIMIT 1", new String[]{});
 			if (!chatGroup.equals(""))
 				cursor = db.rawQuery("SELECT * FROM messagecache WHERE chatgroup='" + chatGroup + "' ORDER BY timestramp DESC LIMIT 1", new String[]{});
@@ -112,6 +140,7 @@ public class Messages {
 			db.close();
 			return timestramp;
 		} catch (SQLException e) {
+			db.close();
 			Log.e("WeFriends","SQLException at Messages.getLastMessageFrom");
 			Log.e("WeFriends",e.getMessage());
 			return -1;
@@ -158,7 +187,6 @@ public class Messages {
 			return messageList;
 			
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
@@ -179,8 +207,7 @@ public class Messages {
 		return newList;
 	}
 	
-	public List<ContentValues> getCachedMessages(String messageType, String sender, String chatGroup, int page) {
-		SQLiteDatabase db = database.getReadableDatabase();
+	public synchronized List<ContentValues> getCachedMessages(String messageType, String sender, String chatGroup, int page) {
 		Cursor cursor = null;
 		String selectionStr = "";
 		boolean firstSelection = true;
@@ -206,11 +233,14 @@ public class Messages {
 			selectionStr += (" LIMIT " + page*15);
 		String sqlStr = "SELECT * FROM messagecache" + selectionStr;
 		//Log.d("WeFriends","sql=" + sqlStr);
+		SQLiteDatabase db = database.getReadableDatabase();
 		try {
 			cursor = db.rawQuery(sqlStr, new String[]{});
-		} catch (SQLException e) {
+		} catch (Exception e) {
+			db.close();
 			Log.e("WeFriends","SQL Exception at Messages.getCachedMessages");
 			Log.e("WeFriends",e.getMessage());
+			Log.e("WeFriends","SQL="+sqlStr);
 			return new ArrayList<ContentValues>();
 		}
 		

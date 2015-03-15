@@ -4,12 +4,25 @@
     android:layout_height="match_parent"
     android:background="#DDDDDD" >
     
-        
+    <LinearLayout android:layout_width="match_parent"
+        android:layout_height="wrap_content" 
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:layout_margin="5dp" >
+	    <ProgressBar
+	        android:id="@+id/chat_progress_bar"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_alignParentTop="true"
+	        style="?android:attr/progressBarStyleSmallTitle"  
+	        android:visibility="gone" />
+    </LinearLayout>
+            
     <ScrollView 
         android:id="@+id/chat_message_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingBottom="50dp" >
+        android:layout_marginBottom="50dp" >
 		<LinearLayout
 		    android:id="@+id/chat_message_list"
 		    android:layout_width="match_parent"
@@ -54,5 +67,7 @@
         android:layout_height="1dp"
         android:layout_above="@id/chat_bottom_bar"
         android:background="#999999" />
+
+
     
 </RelativeLayout>
