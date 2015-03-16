@@ -2,7 +2,7 @@ package com.infinity.utils;
 
 import android.util.Log;
 
-public class Encrytor {
+public class Encryptor {
     static public String getRealKey(String wefriendsId) {
     	String key = null;
     	key = Md5.md5(wefriendsId);

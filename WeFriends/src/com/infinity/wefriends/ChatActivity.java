@@ -1,11 +1,13 @@
 package com.infinity.wefriends;
 
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.infinity.utils.OnlineImageView;
 import com.infinity.wefriends.apis.Messages;
 import com.infinity.wefriends.apis.Users;
+import com.nineoldandroids.animation.ObjectAnimator;
 
 import android.content.ContentValues;
 import android.content.Intent;
@@ -25,6 +27,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
@@ -35,12 +38,16 @@ public class ChatActivity extends ActionBarActivity {
 	static final public int SCROLL_TO_BOTTOM = 100;
 	static final public int LOAD_HISTORY = 101;
 	static final public int HISTORY_LOADING_FINISHED = 102;
+	static final public int MESSAGE_SENDING_FINISHED = 103;
+	static final public int MESSAGE_SENDING_FAILED = 104;
 	
 	public String contactId = "";
 	protected String contactNickname = "";
 	protected String contactAvatar = "";
 	public String chatGroup = "";
 	protected String userId = "";
+	protected String userNickname = "";
+	protected String userAvatar = "";
 	
 	protected Users usersAPI = null;
 	public Messages messagesAPI = null;
@@ -61,6 +68,8 @@ public class ChatActivity extends ActionBarActivity {
 	ScrollView scrollList = null;
 	
 	List<String> LoadedMessages = new ArrayList<String>();
+	
+	protected boolean isLoadingHistory = false;
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -89,6 +98,8 @@ public class ChatActivity extends ActionBarActivity {
 		userInfo = usersAPI.getCachedUserInfo();
 		if (userInfo!=null) {
 			userId = userInfo.getAsString("wefriendsid");
+			userNickname = userInfo.getAsString("nickname");
+			userAvatar = userInfo.getAsString("avatar");
 		}
 		
 		if (contactId==null) {
@@ -116,7 +127,9 @@ public class ChatActivity extends ActionBarActivity {
 		registerReceiver(chatMessageReceiver, new IntentFilter(NotifierService.NEW_MESSAGE_ACTION));
 		
 		scrollList = (ScrollView)findViewById(R.id.chat_message_scroll_view);
-		scrollList.setOnTouchListener(new ScrollViewListener());	
+		scrollList.setOnTouchListener(new ScrollViewListener());
+		
+		((Button)findViewById(R.id.chat_send_message_button)).setOnClickListener(new SendButtonListener());
 		
 	}
 
@@ -144,13 +157,13 @@ public class ChatActivity extends ActionBarActivity {
 		return messageHistoryList;		
 	}
 	
-	public void addMessageToView(ContentValues message, boolean addToBottom) {
+	public View addMessageToView(ContentValues message, boolean addToBottom) {
 		View messageView = null;
 		LinearLayout messageContainerView = null;
 		if (isMessageLoaded(message))
-			return;
+			return null;
 		if (message.getAsString("messagetype").equals(Messages.MESSAGE_FRIEND_REQUEST))
-			return;
+			return null;
 		if (!message.getAsString("sender").equals(userId)) {
 			messageView = LayoutInflater.from(this).inflate(R.layout.chat_message_container_remote, null);
 			((OnlineImageView)messageView.findViewById(R.id.chat_message_avatar_remote)).asyncLoadOnlineImage("http://" + getString(R.string.server_host) + ":" + getString(R.string.server_web_service_port) + "/" + message.getAsString("senderavatar"),Environment.getExternalStorageDirectory()+"/wefriends/cache");
@@ -183,6 +196,7 @@ public class ChatActivity extends ActionBarActivity {
 		}
 		lastMessageTimestramp = message.getAsLong("timestramp");
 		LoadedMessages.add(message.getAsString("messageid"));
+		return messageView;
 	}
 	
 	protected boolean isMessageLoaded(ContentValues message) {
@@ -202,6 +216,7 @@ public class ChatActivity extends ActionBarActivity {
 	protected View getMessageView(ContentValues message) {
 		String messageType = message.getAsString("messagetype");
 		if (messageType.equals(Messages.MESSAGE_TEXT)) {
+			//TODO : Display Emoji in textView
 			TextView textView = new TextView(this);
 			textView.setText(message.getAsString("message"));
 			textView.setTextColor(Color.BLACK);
@@ -229,18 +244,28 @@ public class ChatActivity extends ActionBarActivity {
 			    });
 			    break;
 			case LOAD_HISTORY:
+				if (isLoadingHistory)
+					break;
+				isLoadingHistory = true;
 				asyncTask.loadMessageHistory();
+				animatedSetScrollViewMarginTop(0,25);
 				((ProgressBar)findViewById(R.id.chat_progress_bar)).setVisibility(View.VISIBLE);
-				setScrollViewMarginTop(25);
 				break;
 			case HISTORY_LOADING_FINISHED:
 				loadHistory((List<ContentValues>)(msg.getData().getParcelableArrayList("history").get(0)));
 				((ProgressBar)findViewById(R.id.chat_progress_bar)).setVisibility(View.GONE);
-				setScrollViewMarginTop(0);
+				animatedSetScrollViewMarginTop(25,0);
 				if (init) {
 					ChatActivity.this.handler.sendEmptyMessage(SCROLL_TO_BOTTOM);
 					init = false;
 				}
+				isLoadingHistory = false;
+				break;
+			case MESSAGE_SENDING_FAILED:
+				Log.e("WeFriends","Message sending failed.");
+			case MESSAGE_SENDING_FINISHED:
+				View messageView = (View)msg.getData().getParcelableArrayList("messageview").get(0);
+				messageView.findViewById(R.id.chat_message_container_progress_bar).setVisibility(View.GONE);
 				break;
 			}
 			super.handleMessage(msg);
@@ -248,10 +273,45 @@ public class ChatActivity extends ActionBarActivity {
 		
 	}
 	
+	public void animatedSetScrollViewMarginTop(int start, int end) {
+		ObjectAnimator animation = ObjectAnimator.ofInt(this, "scrollViewMarginTop", start, end);
+		animation.setDuration(300);
+		animation.start();
+	}
+	
 	public void setScrollViewMarginTop(int marginTop) {
 		ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams)scrollList.getLayoutParams();
 		params.setMargins(0, marginTop, 0, 50);
 		scrollList.setLayoutParams(params);
+	}
+	
+	public void sendMessage(String messageType, String messageText) {
+		String receivers = null;
+		if (chatGroup.equals("")) {
+			receivers = contactId;
+		} else {
+			//TODO : for chat-group, add every member id in receivers string.
+		}
+		ContentValues message = new ContentValues();
+		message.put("sender", userId);
+		message.put("sendernickname", userNickname);
+		message.put("senderavatar", userAvatar);
+		message.put("messagetype", messageType);
+		message.put("chatgroup", chatGroup);
+		message.put("timestramp", System.currentTimeMillis()/1000);
+		message.put("message",messageText);
+		message.put("receivers",receivers);
+		View messageView = addMessageToView(message, true);
+		messageView.findViewById(R.id.chat_message_container_progress_bar).setVisibility(View.VISIBLE);
+		asyncTask.sendMessage(message, messageView);
+	}
+	
+	class SendButtonListener implements View.OnClickListener {
+		@Override
+		public void onClick(View v) {
+			String messageText = ((TextView)findViewById(R.id.chat_message_edit_text)).getText().toString();
+			sendMessage("text",messageText);
+		}
 	}
 	
 	class ScrollViewListener implements View.OnTouchListener {
@@ -263,13 +323,15 @@ public class ChatActivity extends ActionBarActivity {
 				initPos = event.getY();
 				isPressed = true;
 			}
-			if (event.getAction()==MotionEvent.ACTION_UP && scrollList.getScrollY()==0 && (event.getY()-initPos>20) && isPressed) {
+			if (event.getAction()==MotionEvent.ACTION_MOVE && scrollList.getScrollY()==0 && (event.getY()-initPos>20) && isPressed) {
 				handler.sendEmptyMessage(LOAD_HISTORY);
+				isPressed = false;
+			}
+			if (event.getAction()==MotionEvent.ACTION_UP) {
 				isPressed = false;
 			}
 			return false;
 		}
-		
 	}
 
 }

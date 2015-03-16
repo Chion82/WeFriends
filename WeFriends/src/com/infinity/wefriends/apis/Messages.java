@@ -7,11 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.infinity.utils.Encrytor;
+import com.infinity.utils.Encryptor;
 import com.infinity.utils.HttpRequest;
 import com.infinity.wefriends.NotifierService;
 import com.infinity.wefriends.R;
@@ -29,10 +31,13 @@ public class Messages {
 	protected Context m_context;
 	protected DatabaseHelper database = null;
 	
-	static public String MESSAGE_TEXT = "text";
-	static public String MESSAGE_IMAGE = "image";
-	static public String MESSAGE_FILE  = "file";
-	static public String MESSAGE_FRIEND_REQUEST = "friendrequest";
+	static final public String MESSAGE_TEXT = "text";
+	static final public String MESSAGE_IMAGE = "image";
+	static final public String MESSAGE_FILE  = "file";
+	static final public String MESSAGE_FRIEND_REQUEST = "friendrequest";
+	
+	static final public int SUCCESS = 200;
+	static final public int FAILED = 201;
 	
 	public Messages(Context context) {
 		m_context = context;
@@ -45,6 +50,38 @@ public class Messages {
 			return new SimpleDateFormat("HH:mm").format(timestramp*1000);
 		else
 			return new SimpleDateFormat("yyyy/MM/dd HH:mm").format(timestramp*1000);
+	}
+	
+	public synchronized int sendMessage(ContentValues message) {
+		HttpRequest.Response response = new HttpRequest.Response();
+		String requestURL = "http://" + m_context.getString(R.string.server_host) + ":" + m_context.getString(R.string.server_web_service_port) + "/messages/sendmessage";
+		List<NameValuePair> postFields = new ArrayList<NameValuePair>();
+		postFields.add(new BasicNameValuePair("accesstoken", users.getCachedAccessToken()));
+		postFields.add(new BasicNameValuePair("messagetype", message.getAsString("messagetype")));
+		postFields.add(new BasicNameValuePair("chatgroup", message.getAsString("chatgroup")));
+		postFields.add(new BasicNameValuePair("receivers", message.getAsString("receivers")));
+		postFields.add(new BasicNameValuePair("message",Encryptor.autoEncrypt(message.getAsString("message"), message.getAsString("sender"))));
+		if (HttpRequest.post(requestURL, postFields, response)==HttpRequest.HTTP_FAILED)
+			return FAILED;
+		try {
+			JSONObject jsonObj = new JSONObject(response.getString());
+			if (jsonObj.getInt("status")!=200) {
+				users.broadcastReLoginAction();
+				return FAILED;
+			} else {
+				message.remove("receivers");
+				message.put("ishandled", 1);
+				message.put("notificationid", 0);
+				message.put("messageid", generateMessageId());
+				SQLiteDatabase db = database.getWritableDatabase();
+				db.insert("messagecache","",message);
+				db.close();
+				return SUCCESS;
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}		
+		return FAILED;
 	}
 	
 	public List<ContentValues> updateContactListWithNewMessages(List<ContentValues> srcList) {
@@ -176,7 +213,7 @@ public class Messages {
 				message.put("messagetype",messageObj.getString("messagetype"));
 				message.put("chatgroup", URLDecoder.decode(messageObj.getString("chatgroup"),"utf-8"));
 				message.put("timestramp", messageObj.getLong("timestramp"));
-				message.put("message", Encrytor.autoDecrypt(URLDecoder.decode(messageObj.getString("message"),"utf-8"),sender));
+				message.put("message", Encryptor.autoDecrypt(URLDecoder.decode(messageObj.getString("message"),"utf-8"),sender));
 				message.put("ishandled", 0);
 				message.put("notificationid", 0);
 				message.put("messageid", generateMessageId());
