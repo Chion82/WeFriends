@@ -4,12 +4,15 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.infinity.utils.Calculations;
 import com.infinity.utils.OnlineImageView;
 import com.infinity.wefriends.apis.Messages;
 import com.infinity.wefriends.apis.Users;
 import com.nineoldandroids.animation.ObjectAnimator;
 
+import android.app.NotificationManager;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
@@ -57,7 +60,7 @@ public class ChatActivity extends ActionBarActivity {
 	protected LinearLayout messageListLayout = null;
 	protected long lastMessageTimestramp = System.currentTimeMillis()/1000;
 	
-	protected int currentPage = 0;
+	protected int currentPage = 1;
 	
 	protected boolean init = true;
 	
@@ -70,6 +73,8 @@ public class ChatActivity extends ActionBarActivity {
 	List<String> LoadedMessages = new ArrayList<String>();
 	
 	protected boolean isLoadingHistory = false;
+	
+	protected NotificationManager notificationManager = null;
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -119,10 +124,7 @@ public class ChatActivity extends ActionBarActivity {
 		
 		
 		messageListLayout = (LinearLayout)findViewById(R.id.chat_message_list);
-		
-		handler.sendEmptyMessage(LOAD_HISTORY);
-		messagesAPI.markMessagesAsRead(contactId, chatGroup);
-		
+
 		chatMessageReceiver = new ChatMessageReceiver(this);
 		registerReceiver(chatMessageReceiver, new IntentFilter(NotifierService.NEW_MESSAGE_ACTION));
 		
@@ -131,6 +133,10 @@ public class ChatActivity extends ActionBarActivity {
 		
 		((Button)findViewById(R.id.chat_send_message_button)).setOnClickListener(new SendButtonListener());
 		
+		notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+		
+		handler.sendEmptyMessage(LOAD_HISTORY);
+		messagesAPI.markMessagesAsRead(contactId, chatGroup);
 	}
 
 	@Override
@@ -147,11 +153,7 @@ public class ChatActivity extends ActionBarActivity {
 	}
 	
 	public List<ContentValues> getHistory() {
-		List<ContentValues> messageHistoryList = null;
-		if (!chatGroup.equals(""))
-			messageHistoryList = messagesAPI.getCachedMessages("", "", chatGroup, currentPage+1);
-		else
-			messageHistoryList = messagesAPI.getCachedMessages("", contactId, "", currentPage+1);
+		List<ContentValues> messageHistoryList = messagesAPI.getChatHistory(contactId,chatGroup,currentPage);
 		if (messageHistoryList.size()>0)
 			currentPage++;
 		return messageHistoryList;		
@@ -194,6 +196,7 @@ public class ChatActivity extends ActionBarActivity {
 			if (timeView!=null)
 				messageListLayout.addView(timeView,0);
 		}
+		notificationManager.cancel(message.getAsInteger("notificationid"));
 		lastMessageTimestramp = message.getAsLong("timestramp");
 		LoadedMessages.add(message.getAsString("messageid"));
 		return messageView;
@@ -247,14 +250,14 @@ public class ChatActivity extends ActionBarActivity {
 				if (isLoadingHistory)
 					break;
 				isLoadingHistory = true;
-				asyncTask.loadMessageHistory();
-				animatedSetScrollViewMarginTop(0,25);
+				animatedSetScrollViewMarginTop(0,Calculations.dip2px(ChatActivity.this, 25));
 				((ProgressBar)findViewById(R.id.chat_progress_bar)).setVisibility(View.VISIBLE);
+				asyncTask.loadMessageHistory();
 				break;
 			case HISTORY_LOADING_FINISHED:
 				loadHistory((List<ContentValues>)(msg.getData().getParcelableArrayList("history").get(0)));
 				((ProgressBar)findViewById(R.id.chat_progress_bar)).setVisibility(View.GONE);
-				animatedSetScrollViewMarginTop(25,0);
+				animatedSetScrollViewMarginTop(Calculations.dip2px(ChatActivity.this, 25),0);
 				if (init) {
 					ChatActivity.this.handler.sendEmptyMessage(SCROLL_TO_BOTTOM);
 					init = false;
@@ -281,7 +284,7 @@ public class ChatActivity extends ActionBarActivity {
 	
 	public void setScrollViewMarginTop(int marginTop) {
 		ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams)scrollList.getLayoutParams();
-		params.setMargins(0, marginTop, 0, 50);
+		params.setMargins(0, marginTop, 0, Calculations.dip2px(this, 60));
 		scrollList.setLayoutParams(params);
 	}
 	

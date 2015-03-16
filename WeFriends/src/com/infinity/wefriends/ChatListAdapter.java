@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.infinity.utils.OnlineImageView;
 import com.infinity.wefriends.apis.Messages;
+import com.infinity.wefriends.apis.Users;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -23,11 +24,19 @@ public class ChatListAdapter extends BaseAdapter {
 	protected LayoutInflater inflater = null;
 	protected Messages messagesAPI = null;
 	
+	protected Users usersAPI = null;
+	protected String userId = "";
+	
 	public ChatListAdapter(Context context, List<ContentValues> listValues) {
 		chatList = listValues;
 		m_context = context;
 		inflater = LayoutInflater.from(context);
 		messagesAPI = new Messages(context);
+		usersAPI = new Users(context);
+		ContentValues userInfo = usersAPI.getCachedUserInfo();
+		if (userInfo!=null) {
+			userId = userInfo.getAsString("wefriendsid");
+		}
 	}
 
 	@Override

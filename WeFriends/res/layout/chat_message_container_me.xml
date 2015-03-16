@@ -13,7 +13,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:visibility="visible" />
+        android:visibility="gone" />
     
 	<LinearLayout android:id="@+id/chat_message_container_view_me"
 	    android:layout_height="wrap_content"

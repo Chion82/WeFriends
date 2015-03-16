@@ -30,6 +30,7 @@ public class Messages {
 	protected Users users = null;
 	protected Context m_context;
 	protected DatabaseHelper database = null;
+	protected String userId = "";
 	
 	static final public String MESSAGE_TEXT = "text";
 	static final public String MESSAGE_IMAGE = "image";
@@ -43,6 +44,9 @@ public class Messages {
 		m_context = context;
 		users = new Users(context);
 		database = new DatabaseHelper(context,"wefriendsdb");
+		ContentValues userInfo = users.getCachedUserInfo();
+		if (userInfo!=null)
+			userId = userInfo.getAsString("wefriendsid");
 	}
 	
 	static public String timestrampToString(long timestramp) {
@@ -69,7 +73,6 @@ public class Messages {
 				users.broadcastReLoginAction();
 				return FAILED;
 			} else {
-				message.remove("receivers");
 				SQLiteDatabase db = database.getWritableDatabase();
 				db.insert("messagecache","",message);
 				db.close();
@@ -98,7 +101,7 @@ public class Messages {
 			SQLiteDatabase db = database.getReadableDatabase();
 			Cursor cursor = null;
 			if (chatGroup.equals(""))
-				cursor = db.rawQuery("SELECT * FROM messagecache WHERE sender='"+sender+"' AND chatgroup='' AND ishandled=0 ORDER BY timestramp DESC", new String[]{});
+				cursor = db.rawQuery("SELECT * FROM messagecache WHERE ( (sender='"+sender+"') OR (sender='" + userId + "' AND receivers='" + sender + "' ) ) AND chatgroup='' AND ishandled=0 ORDER BY timestramp DESC", new String[]{});
 			else
 				cursor = db.rawQuery("SELECT * FROM messagecache WHERE chatgroup='" + chatGroup + "' AND ishandled=0 ORDER BY timestramp DESC", new String[]{});
 			int count = cursor.getCount();
@@ -128,6 +131,7 @@ public class Messages {
 				value.put("senderavatar", cursor.getString(cursor.getColumnIndex("senderavatar")));
 				value.put("notificationid", cursor.getInt(cursor.getColumnIndex("notificationid")));
 				value.put("messageid", cursor.getString(cursor.getColumnIndex("messageid")));
+				value.put("receivers", cursor.getString(cursor.getColumnIndex("receivers")));
 				resultList.add(value);
 			}
 			
@@ -142,9 +146,12 @@ public class Messages {
 	public String getLastMessageFrom(String sender, String chatGroup) {
 		SQLiteDatabase db = database.getReadableDatabase();
 		try {
-			Cursor cursor = db.rawQuery("SELECT * FROM messagecache WHERE sender='"+sender+"' AND chatgroup='" + chatGroup + "' ORDER BY timestramp DESC LIMIT 1", new String[]{});
-			if (!chatGroup.equals(""))
+			Cursor cursor = null;
+			if (chatGroup.equals(""))
+				cursor = db.rawQuery("SELECT * FROM messagecache WHERE ( (sender='"+sender+"') OR (sender='" + userId + "' AND receivers='" + sender + "' ) ) AND chatgroup='' ORDER BY timestramp DESC LIMIT 1", new String[]{});
+			else
 				cursor = db.rawQuery("SELECT * FROM messagecache WHERE chatgroup='" + chatGroup + "' ORDER BY timestramp DESC LIMIT 1", new String[]{});
+			
 			if (!cursor.moveToNext()) {
 				db.close();
 				return "";
@@ -163,9 +170,12 @@ public class Messages {
 	public long getLastMessageTimestramp(String sender, String chatGroup) {
 		SQLiteDatabase db = database.getReadableDatabase();
 		try {
-			Cursor cursor = db.rawQuery("SELECT * FROM messagecache WHERE sender='"+sender+"' AND chatgroup='" + chatGroup + "' ORDER BY timestramp DESC LIMIT 1", new String[]{});
-			if (!chatGroup.equals(""))
+			Cursor cursor = null;
+			if (chatGroup.equals(""))
+				cursor = db.rawQuery("SELECT * FROM messagecache WHERE ( (sender='"+sender+"') OR (sender='" + userId + "' AND receivers='" + sender + "' ) ) AND chatgroup='' ORDER BY timestramp DESC LIMIT 1", new String[]{});
+			else
 				cursor = db.rawQuery("SELECT * FROM messagecache WHERE chatgroup='" + chatGroup + "' ORDER BY timestramp DESC LIMIT 1", new String[]{});
+			
 			if (!cursor.moveToNext()) {
 				db.close();
 				return -1;
@@ -207,6 +217,7 @@ public class Messages {
 				message.put("sender", sender);
 				message.put("sendernickname", URLDecoder.decode(messageObj.getString("sendernickname"),"utf-8"));
 				message.put("senderavatar", URLDecoder.decode(messageObj.getString("senderavatar"),"utf-8"));
+				message.put("receivers", userId);
 				message.put("messagetype",messageObj.getString("messagetype"));
 				message.put("chatgroup", URLDecoder.decode(messageObj.getString("chatgroup"),"utf-8"));
 				message.put("timestramp", messageObj.getLong("timestramp"));
@@ -292,6 +303,7 @@ public class Messages {
 			value.put("senderavatar", cursor.getString(cursor.getColumnIndex("senderavatar")));
 			value.put("notificationid", cursor.getInt(cursor.getColumnIndex("notificationid")));
 			value.put("messageid", cursor.getString(cursor.getColumnIndex("messageid")));
+			value.put("receivers", cursor.getString(cursor.getColumnIndex("receivers")));
 			resultList.add(value);
 		}
 		db.close();
@@ -340,6 +352,52 @@ public class Messages {
 			Log.e("WeFriends",e.getMessage());
     	}
     	db.close();
+    }
+    
+    public synchronized List<ContentValues> getChatHistory(String contact, String chatGroup, int page) {
+    	SQLiteDatabase db = database.getReadableDatabase();
+    	List<ContentValues> historyList = new ArrayList<ContentValues>();
+    	String sql = null;
+    	Cursor cursor = null;
+    	if (chatGroup.equals("")) {
+    		sql = "SELECT * FROM messagecache WHERE ( (sender='" + userId + "' AND receivers='" + contact + "') OR sender='" + contact + "') AND chatgroup=''";
+    	} else {
+    		sql = "SELECT * FROM messagecache WHERE chatgroup='" + chatGroup + "'";
+    	}
+    	sql += " ORDER BY timestramp DESC";
+    	if (page>0) {
+    		sql += (" LIMIT " + page*15);
+    	}
+    	try {
+    		cursor = db.rawQuery(sql, new String[]{});
+    		while (cursor.moveToNext()) {
+    			ContentValues value = new ContentValues();
+    			value.put("sender", cursor.getString(cursor.getColumnIndex("sender")));
+    			value.put("messagetype", cursor.getString(cursor.getColumnIndex("messagetype")));
+    			value.put("chatgroup", cursor.getString(cursor.getColumnIndex("chatgroup")));
+    			value.put("timestramp", cursor.getLong(cursor.getColumnIndex("timestramp")));
+    			value.put("message", cursor.getString(cursor.getColumnIndex("message")));
+    			value.put("ishandled", cursor.getInt(cursor.getColumnIndex("ishandled")));
+    			value.put("sendernickname", cursor.getString(cursor.getColumnIndex("sendernickname")));
+    			value.put("senderavatar", cursor.getString(cursor.getColumnIndex("senderavatar")));
+    			value.put("notificationid", cursor.getInt(cursor.getColumnIndex("notificationid")));
+    			value.put("messageid", cursor.getString(cursor.getColumnIndex("messageid")));
+    			value.put("receivers", cursor.getString(cursor.getColumnIndex("receivers")));
+    			historyList.add(value);
+    		}
+    	} catch (SQLException e) {
+    		Log.e("WeFriends","SQLException at Messages.getChatHistory");
+    		Log.e("WeFriends",e.getMessage());
+    	}
+    	db.close();
+    	if (page>0) {
+    		int skipCount = (page-1) * 15;
+    		for (int i=0;i<skipCount;i++) {
+    			if (historyList.size() > 0)
+    				historyList.remove(0);
+    		}
+    	}
+    	return historyList;
     }
     
 }
