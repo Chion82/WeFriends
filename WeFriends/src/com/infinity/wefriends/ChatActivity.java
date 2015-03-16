@@ -301,6 +301,9 @@ public class ChatActivity extends ActionBarActivity {
 		message.put("timestramp", System.currentTimeMillis()/1000);
 		message.put("message",messageText);
 		message.put("receivers",receivers);
+		message.put("ishandled", 1);
+		message.put("notificationid", 0);
+		message.put("messageid", messagesAPI.generateMessageId());
 		View messageView = addMessageToView(message, true);
 		messageView.findViewById(R.id.chat_message_container_progress_bar).setVisibility(View.VISIBLE);
 		asyncTask.sendMessage(message, messageView);

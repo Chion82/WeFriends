@@ -70,9 +70,6 @@ public class Messages {
 				return FAILED;
 			} else {
 				message.remove("receivers");
-				message.put("ishandled", 1);
-				message.put("notificationid", 0);
-				message.put("messageid", generateMessageId());
 				SQLiteDatabase db = database.getWritableDatabase();
 				db.insert("messagecache","",message);
 				db.close();
