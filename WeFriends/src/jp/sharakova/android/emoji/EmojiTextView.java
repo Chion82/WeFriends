@@ -26,7 +26,7 @@ public class EmojiTextView extends TextView {
 	}
 	
 	public void setEmojiText(String text) {
-		text = EmojiUtils.convertTag(text);
+		//text = EmojiUtils.convertTag(text);
 		CharSequence spanned = Html.fromHtml(text, emojiGetter, null);
 		setText(spanned);
 	}

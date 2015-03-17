@@ -33,10 +33,14 @@ public class EmojiEditText extends EditText {
 	}
 	
 	public void setEmojiText(String text) {
-		text = EmojiUtils.convertTag(text);
+		//text = EmojiUtils.convertTag(text);
 		CharSequence spanned = Html.fromHtml(text, emojiGetter, null);
 		setText(spanned);
 		Log.d("WeFriends","text=" + getText().toString());
+	}
+	
+	public String getHtml() {
+		return Html.toHtml(getText()).replaceAll("<p.*?>", "").replaceAll("</p>", "");
 	}
 	
 	private ImageGetter emojiGetter = new ImageGetter()

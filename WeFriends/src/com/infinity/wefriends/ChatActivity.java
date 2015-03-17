@@ -37,6 +37,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
@@ -82,6 +83,8 @@ public class ChatActivity extends ActionBarActivity {
 	protected boolean isLoadingHistory = false;
 	
 	protected NotificationManager notificationManager = null;
+	
+	protected boolean isEmotionListVisible = false;
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -144,6 +147,19 @@ public class ChatActivity extends ActionBarActivity {
 		
 		loadAllEmoji();
 		
+		((Button)findViewById(R.id.chat_emotion_button)).setOnClickListener(new View.OnClickListener() {	
+			@Override
+			public void onClick(View v) {
+				if (isEmotionListVisible) {
+					((ScrollView)findViewById(R.id.chat_emotion_list)).setVisibility(View.GONE);
+					isEmotionListVisible = false;
+				} else {
+					((ScrollView)findViewById(R.id.chat_emotion_list)).setVisibility(View.VISIBLE);
+					isEmotionListVisible = true;
+				}
+			}
+		});
+		
 		/*UI Initialization Completed*/
 		
 		notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
@@ -198,6 +214,7 @@ public class ChatActivity extends ActionBarActivity {
 		if (Math.abs(message.getAsLong("timestramp")-lastMessageTimestramp) > 180) {
 			timeView = LayoutInflater.from(this).inflate(R.layout.chat_message_time, null);
 			((TextView)timeView.findViewById(R.id.chat_message_time_text)).setText(Messages.timestrampToString(message.getAsLong("timestramp")));
+			lastMessageTimestramp = message.getAsLong("timestramp");
 		}
 		if (addToBottom) {
 			if (timeView!=null)
@@ -210,7 +227,6 @@ public class ChatActivity extends ActionBarActivity {
 				messageListLayout.addView(timeView,0);
 		}
 		notificationManager.cancel(message.getAsInteger("notificationid"));
-		lastMessageTimestramp = message.getAsLong("timestramp");
 		LoadedMessages.add(message.getAsString("messageid"));
 		return messageView;
 	}
@@ -328,8 +344,10 @@ public class ChatActivity extends ActionBarActivity {
 	class SendButtonListener implements View.OnClickListener {
 		@Override
 		public void onClick(View v) {
-			String messageText = messageEditText.getText().toString();
+			String messageText = messageEditText.getHtml();
 			sendMessage("text",messageText);
+			((ScrollView)findViewById(R.id.chat_emotion_list)).setVisibility(View.GONE);
+			messageEditText.setText("");
 		}
 	}
 	
@@ -356,11 +374,9 @@ public class ChatActivity extends ActionBarActivity {
 	protected void loadAllEmoji() {
 		WrapViewGroup emojiViewGroup = (WrapViewGroup)findViewById(R.id.chat_emoji_container);
 		for (int i=1;i<=50;i++) {
-			Button emojiBtn = new Button(this);
-			emojiBtn.setBackgroundResource(R.drawable.e01 + (i-1));
-			emojiBtn.setOnClickListener(new EmojiOnClickListener(i));
-			emojiBtn.setHeight(30);
-			emojiBtn.setWidth(30);
+			ImageView emojiBtn = new ImageView(this);
+			emojiBtn.setImageResource(R.drawable.e01 + (i-1));
+			emojiBtn.setOnClickListener(new EmojiOnClickListener(i));		
 			emojiViewGroup.addView(emojiBtn);
 		}
 	}
@@ -372,7 +388,7 @@ public class ChatActivity extends ActionBarActivity {
 		}
 		@Override
 		public void onClick(View v) {
-			messageEditText.setText(messageEditText.getText().toString() + "%%i:" + index + "%%");
+			messageEditText.setEmojiText(messageEditText.getHtml() + "<img src=\"se" + ((index<10)?"0":"") + index + "\"/>");
 		}
 		
 	}

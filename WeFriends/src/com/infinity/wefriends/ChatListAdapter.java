@@ -2,6 +2,8 @@ package com.infinity.wefriends;
 
 import java.util.List;
 
+import jp.sharakova.android.emoji.EmojiTextView;
+
 import com.infinity.utils.OnlineImageView;
 import com.infinity.wefriends.apis.Messages;
 import com.infinity.wefriends.apis.Users;
@@ -59,7 +61,7 @@ public class ChatListAdapter extends BaseAdapter {
 		final ContentValues chatInfo = chatList.get(pos);
 		View itemView = inflater.inflate(R.layout.contact_list_item_view, null);
 		TextView mainTitle = (TextView)itemView.findViewById(R.id.contact_list_item_view_main_title);
-		TextView subtitle = (TextView)itemView.findViewById(R.id.contact_list_item_view_subtitle);
+		EmojiTextView subtitle = (EmojiTextView)itemView.findViewById(R.id.contact_list_item_view_subtitle);
 		OnlineImageView image = (OnlineImageView)itemView.findViewById(R.id.contact_list_item_view_avatar);
 		TextView messageNotification = (TextView)itemView.findViewById(R.id.chat_item_notification);
 		String chatType = chatInfo.getAsString("chattype");
@@ -70,7 +72,7 @@ public class ChatListAdapter extends BaseAdapter {
 			if (chatInfo.getAsString("chatgroup").equals("")) {
 				mainTitle.setText(chatInfo.getAsString("contactnickname"));
 				if (chatInfo.getAsString("chattype").equals(Messages.MESSAGE_TEXT))
-					subtitle.setText(messagesAPI.getLastMessageFrom(chatInfo.getAsString("contact"), chatInfo.getAsString("chatgroup")));
+					subtitle.setEmojiText(messagesAPI.getLastMessageFrom(chatInfo.getAsString("contact"), chatInfo.getAsString("chatgroup")).replaceAll("<.*?>", " "));
 			} else {
 				mainTitle.setText(chatInfo.getAsString("chatgroup"));
 				if (!chatInfo.getAsString("contact").equals("")) {

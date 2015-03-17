@@ -28,6 +28,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.support.v4.app.NotificationCompat;
+import android.text.Html;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -179,11 +180,11 @@ public class NotifierService extends Service {
 			if (message.getAsString("chatgroup").equals("")) {
 				builder.setContentTitle(message.getAsString("sendernickname") + m_context.getString(R.string.notification_new_im));
 				if (message.getAsString("messagetype").equals(Messages.MESSAGE_TEXT))
-					builder.setContentText(message.getAsString("message"));
+					builder.setContentText(Html.fromHtml(message.getAsString("message")).toString());
 			} else {
 				builder.setContentTitle(message.getAsString("chatgroup"));
 				if (message.getAsString("messagetype").equals(Messages.MESSAGE_TEXT))
-					builder.setContentText(message.getAsString("sendernickname") + " : " + message.getAsString("message"));
+					builder.setContentText(message.getAsString("sendernickname") + " : " + Html.fromHtml(message.getAsString("message")).toString());
 			}
 			Intent intent = new Intent();
 			intent.setClass(NotifierService.this, MainActivity.class);

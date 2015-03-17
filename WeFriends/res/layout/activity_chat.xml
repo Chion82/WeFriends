@@ -94,10 +94,12 @@
         android:background="#999999" />
         
         <ScrollView
+            android:id="@+id/chat_emotion_list"
             android:layout_width="match_parent"
             android:layout_height="130dp"
             android:background="#FFFFFF"
-            android:overScrollMode="never" >
+            android:overScrollMode="never"
+            android:visibility="gone" >
 	        <com.infinity.utils.WrapViewGroup
 	            android:id="@+id/chat_emoji_container"
 	            android:layout_width="match_parent"
