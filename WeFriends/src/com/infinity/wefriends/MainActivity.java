@@ -1,5 +1,7 @@
 package com.infinity.wefriends;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,14 +82,8 @@ public class MainActivity extends ActionBarActivity {
 	protected Chats chatsAPI = null;
 	
 	
-	public void test() {	
-		//This method is for testing Android or Java functions.
-		//Automatically called at onCreate()
-		//Comment out all codes in this method when completing test.
-		/*Log.d("WeFriendsTest","decoderesult = " + Encrytor.autoDecrypt("9XxTqkZvTOzHvflXh+wVTQ==", "testuser"));
-		String encryptedStr = Encrytor.autoEncrypt("Screw U guys, I'm going home.", "testuser");
-		Log.d("WeFriendsTest","encoded = " + encryptedStr);
-		Log.d("WeFriendsTest","encoded = " + Encrytor.autoDecrypt(encryptedStr,"testuser"));*/
+	public void test() {
+		
 	}
 	
 	@Override
@@ -160,7 +156,7 @@ public class MainActivity extends ActionBarActivity {
 	
 	public void loadAllOnlineData() {
 		Log.d("WeFriends","Loading All Data.");
-		asyncTask.loadOnlineFriendList();
+		asyncTask.loadOnlineUserInfoAndFriendList();
 		
 		//TODO
 		
@@ -199,8 +195,10 @@ public class MainActivity extends ActionBarActivity {
 	
 	@Override
 	protected void onDestroy() {
-		if (isNotifierServiceBound)
+		if (isNotifierServiceBound) {
 			unbindService(conn);
+			isNotifierServiceBound = false;
+		}
 		unregisterReceiver(reloginReceiver);
 		unregisterReceiver(newMessageReceiver);
 		super.onDestroy();

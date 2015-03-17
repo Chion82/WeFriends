@@ -55,7 +55,7 @@ public class MainAsyncTask {
 		}.start();
 	}*/
 	
-	public void loadOnlineFriendList() {
+	public void loadOnlineUserInfoAndFriendList() {
 		new Thread() {
 			@Override
 			public void run() {
@@ -71,9 +71,11 @@ public class MainAsyncTask {
 					((MainActivity)m_context).handler.sendMessage(msg);
 					Log.d("WeFriends","Loading online contact list");
 				}
+				users.getAndSaveUserInfo();
 				super.run();
 			}
 		}.start();
 	}
+	
 
 }

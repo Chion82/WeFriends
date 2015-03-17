@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?><RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#DDDDDD" >
@@ -37,29 +36,75 @@
         android:id="@+id/chat_bottom_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:layout_alignParentBottom="true"
-        android:background="#FFFFFF" >
-
-        <EditText
-            android:id="@+id/chat_message_edit_text"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="4"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp" >
-           
-        </EditText>
+        android:gravity="center_vertical" >
 		
-        <Button
-            android:id="@+id/chat_send_message_button"
-            android:layout_height="40dp"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:background="@drawable/long_button_blue_background"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
-            android:text="@string/send" />
+        <LinearLayout
+        	android:layout_width="match_parent"
+        	android:layout_height="wrap_content"
+        	android:orientation="horizontal"
+        	android:background="#FFFFFF"
+        	android:gravity="center_vertical">
+        
+	        <Button
+	            android:id="@+id/chat_emotion_button"
+	            android:layout_width="30dp"
+	            android:layout_height="30dp"
+	            android:background="@drawable/emotion"
+	            android:layout_marginRight="5dp" />
+	        
+	        <Button
+	            android:id="@+id/chat_plus_button"
+	            android:layout_width="30dp"
+	            android:layout_height="30dp"
+	            android:background="@drawable/plus" />
+	
+	        <jp.sharakova.android.emoji.EmojiEditText
+	            android:id="@+id/chat_message_edit_text"
+	            android:layout_width="0dp"
+	            android:layout_height="wrap_content"
+	            android:layout_weight="4"
+	            android:layout_marginTop="5dp"
+	            android:layout_marginBottom="5dp" />
+			
+	        <Button
+	            android:id="@+id/chat_send_message_button"
+	            android:layout_height="40dp"
+	            android:layout_width="0dp"
+	            android:layout_weight="1"
+	            android:background="@drawable/long_button_blue_background"
+	            android:layout_marginTop="5dp"
+	            android:layout_marginBottom="5dp"
+	            android:text="@string/send"
+	            android:visibility="gone"
+	            android:textColor="#FFFFFF" />
+	        
+	        <Button
+	            android:id="@+id/chat_voice_button"
+	            android:layout_width="40dp"
+	            android:layout_height="40dp"
+	            android:background="@drawable/voice"
+	            android:visibility="visible" />
+	    </LinearLayout>
+	    
+      <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#999999" />
+        
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="130dp"
+            android:background="#FFFFFF"
+            android:overScrollMode="never" >
+	        <com.infinity.utils.WrapViewGroup
+	            android:id="@+id/chat_emoji_container"
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+	            android:orientation="vertical" />
+
+        </ScrollView>
 		
     </LinearLayout>
     
@@ -68,7 +113,5 @@
         android:layout_height="1dp"
         android:layout_above="@id/chat_bottom_bar"
         android:background="#999999" />
-
-
     
 </RelativeLayout>

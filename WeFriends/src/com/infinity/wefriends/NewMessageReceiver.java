@@ -15,7 +15,7 @@ public class NewMessageReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		mainActivity.loadCachedData();
-		mainActivity.loadAllOnlineData();
+		//mainActivity.loadAllOnlineData();
 		
 	}
 

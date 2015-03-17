@@ -41,7 +41,7 @@ public class Users {
 		database = new DatabaseHelper(context,"wefriendsdb");
 	}
 	
-	public int authenticateCachedAccessToken() {
+	public synchronized int authenticateCachedAccessToken() {
 		SQLiteDatabase db = database.getReadableDatabase();
 		Cursor cursor = db.query("usercache", new String[]{"accesstoken"}, "", new String[]{}, "", "", "", "1");
 		if (!cursor.moveToNext()) {
@@ -53,7 +53,7 @@ public class Users {
 		return authenticateAccessToken(accessToken);
 	}
 	
-	public int authenticateAccessToken(String accessToken) {
+	public synchronized int authenticateAccessToken(String accessToken) {
 		HttpRequest.Response response = new HttpRequest.Response();
 		String requestURL = "http://" + m_context.getString(R.string.server_host) + ":" + m_context.getString(R.string.server_web_service_port) + "/users/getuserinfobytoken?accesstoken=" + accessToken;
 		if(HttpRequest.get(requestURL,response) == HttpRequest.HTTP_FAILED)
@@ -72,7 +72,7 @@ public class Users {
 		return CONNECTION_ERROR;
 	}
 	
-	public int login(String phone, String password) {
+	public synchronized int login(String phone, String password) {
 		HttpRequest.Response response = new HttpRequest.Response();
 		String requestURL = "http://" + m_context.getString(R.string.server_host) + ":" + m_context.getString(R.string.server_web_service_port) + "/users/login";
 		List<NameValuePair> postFields = new ArrayList<NameValuePair>();
@@ -115,7 +115,7 @@ public class Users {
 		return CONNECTION_ERROR;
 	}
 	
-	public ContentValues getCachedUserInfo() {
+	public synchronized ContentValues  getCachedUserInfo() {
 		SQLiteDatabase db = database.getReadableDatabase();
 		Cursor cursor = db.query("usercache", new String[]{"wefriendsid","nickname","avatar","phone","email","intro","gender","region","collegeid","whatsup"}, "", new String[]{}, "", "", "","1");
 		if (!cursor.moveToNext()) {
@@ -137,7 +137,7 @@ public class Users {
 		return values;
 	}
 	
-	public ContentValues getAndSaveUserInfo() {
+	public synchronized ContentValues getAndSaveUserInfo() {
 		HttpRequest.Response response = new HttpRequest.Response();
 		String accessToken = getCachedAccessToken();
 		String requestURL = "http://" + m_context.getString(R.string.server_host) + ":" + m_context.getString(R.string.server_web_service_port) + "/users/getuserinfobytoken?accesstoken=" + accessToken;
@@ -176,7 +176,7 @@ public class Users {
 		return null;
 	}
 	
-	public List<ContentValues> getCachedFriendList() {
+	public synchronized List<ContentValues> getCachedFriendList() {
 		SQLiteDatabase db = database.getReadableDatabase();
 		Cursor cursor = db.query("friendscache", new String[]{"wefriendsid", "nickname", "avatar", "whatsup", "intro", "gender", "region", "collegeid", "friendgroup"}, "", new String[]{}, "", "", "");
 		if (cursor.getCount() == 0) {
@@ -202,7 +202,7 @@ public class Users {
 		return list;
 	}
 	
-	public List<ContentValues> getAndSaveFriendList() {
+	public synchronized List<ContentValues> getAndSaveFriendList() {
 		String accessToken = getCachedAccessToken();
 		HttpRequest.Response response = new HttpRequest.Response();
 		String requestURL = "http://" + m_context.getString(R.string.server_host) + ":" + m_context.getString(R.string.server_web_service_port) + "/users/getfriendlist?accesstoken=" + accessToken;
@@ -250,7 +250,7 @@ public class Users {
 		return null;
 	}
 	
-	public void updateMessagesAndChatsInfo(ContentValues info, SQLiteDatabase db) {
+	public synchronized void updateMessagesAndChatsInfo(ContentValues info, SQLiteDatabase db) {
 		try {
 			db.execSQL("UPDATE messagecache SET sendernickname='"
 					+ info.getAsString("nickname") + "',senderavatar='"
@@ -266,7 +266,7 @@ public class Users {
 		}
 	}
 	
-	public String getCachedAccessToken() {
+	public synchronized String getCachedAccessToken() {
 		SQLiteDatabase db = database.getReadableDatabase();
 		Cursor cursor = db.query("usercache", new String[]{"accesstoken"}, "", new String[]{}, "", "", "", "1");
 		if (!cursor.moveToNext()) {

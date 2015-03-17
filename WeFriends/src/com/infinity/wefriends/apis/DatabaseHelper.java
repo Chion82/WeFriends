@@ -1,21 +1,48 @@
 package com.infinity.wefriends.apis;
 
+import java.io.File;
+import java.io.IOException;
+
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 	
+	protected Context m_context = null;
+	protected String lockFile = "";
+
+	@Override
+	public synchronized SQLiteDatabase getReadableDatabase() {
+		//waitForFreeDatabase();
+		return super.getReadableDatabase();
+	}
+
+	@Override
+	public synchronized SQLiteDatabase getWritableDatabase() {
+		//waitForFreeDatabase();
+		return super.getWritableDatabase();
+	}
+
+	@Override
+	public synchronized void close() {
+		//freeDatabase();
+		super.close();
+	}
 
 	public DatabaseHelper(Context context, String dataBaseName) {
 		this(context, dataBaseName, null, 1);
+		m_context = context;
+		lockFile = context.getCacheDir() + "/database.lock";
 	}
 
 	public DatabaseHelper(Context context, String name, CursorFactory factory,
 			int version) {
 		super(context, name, factory, version);
-		// TODO Auto-generated constructor stub
+		m_context = context;
+		lockFile = context.getCacheDir() + "/database.lock";
 	}
 
 	@Override
@@ -31,5 +58,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		// TODO Auto-generated method stub
 		
 	}
-
+	
+	protected void waitForFreeDatabase() {
+		while (new File(lockFile).exists()) {
+			Log.d("WeFriendsDatabase","Database occupied. Waiting.");
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		try {
+			new File(lockFile).createNewFile();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	protected void freeDatabase() {
+		new File(lockFile).delete();
+	}
+	
 }

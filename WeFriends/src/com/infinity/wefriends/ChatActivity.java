@@ -4,8 +4,12 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
+import jp.sharakova.android.emoji.EmojiEditText;
+import jp.sharakova.android.emoji.EmojiTextView;
+
 import com.infinity.utils.Calculations;
 import com.infinity.utils.OnlineImageView;
+import com.infinity.utils.WrapViewGroup;
 import com.infinity.wefriends.apis.Messages;
 import com.infinity.wefriends.apis.Users;
 import com.nineoldandroids.animation.ObjectAnimator;
@@ -23,6 +27,7 @@ import android.os.Message;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -31,6 +36,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
@@ -68,7 +74,8 @@ public class ChatActivity extends ActionBarActivity {
 	
 	public ChatActivityHandler handler = new ChatActivityHandler();
 	
-	ScrollView scrollList = null;
+	protected ScrollView scrollList = null;
+	protected EmojiEditText messageEditText = null;
 	
 	List<String> LoadedMessages = new ArrayList<String>();
 	
@@ -132,6 +139,12 @@ public class ChatActivity extends ActionBarActivity {
 		scrollList.setOnTouchListener(new ScrollViewListener());
 		
 		((Button)findViewById(R.id.chat_send_message_button)).setOnClickListener(new SendButtonListener());
+		
+		messageEditText = (EmojiEditText)findViewById(R.id.chat_message_edit_text);
+		
+		loadAllEmoji();
+		
+		/*UI Initialization Completed*/
 		
 		notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
 		
@@ -220,8 +233,8 @@ public class ChatActivity extends ActionBarActivity {
 		String messageType = message.getAsString("messagetype");
 		if (messageType.equals(Messages.MESSAGE_TEXT)) {
 			//TODO : Display Emoji in textView
-			TextView textView = new TextView(this);
-			textView.setText(message.getAsString("message"));
+			EmojiTextView textView = new EmojiTextView(this);
+			textView.setEmojiText(message.getAsString("message"));
 			textView.setTextColor(Color.BLACK);
 			return textView;
 		} else if (messageType.equals(Messages.MESSAGE_IMAGE)) {
@@ -315,7 +328,7 @@ public class ChatActivity extends ActionBarActivity {
 	class SendButtonListener implements View.OnClickListener {
 		@Override
 		public void onClick(View v) {
-			String messageText = ((TextView)findViewById(R.id.chat_message_edit_text)).getText().toString();
+			String messageText = messageEditText.getText().toString();
 			sendMessage("text",messageText);
 		}
 	}
@@ -339,6 +352,30 @@ public class ChatActivity extends ActionBarActivity {
 			return false;
 		}
 	}
-
+	
+	protected void loadAllEmoji() {
+		WrapViewGroup emojiViewGroup = (WrapViewGroup)findViewById(R.id.chat_emoji_container);
+		for (int i=1;i<=50;i++) {
+			Button emojiBtn = new Button(this);
+			emojiBtn.setBackgroundResource(R.drawable.e01 + (i-1));
+			emojiBtn.setOnClickListener(new EmojiOnClickListener(i));
+			emojiBtn.setHeight(30);
+			emojiBtn.setWidth(30);
+			emojiViewGroup.addView(emojiBtn);
+		}
+	}
+	
+	protected class EmojiOnClickListener implements View.OnClickListener {
+		int index = 1;
+		public EmojiOnClickListener(int emojiIndex) {
+			index = emojiIndex;
+		}
+		@Override
+		public void onClick(View v) {
+			messageEditText.setText(messageEditText.getText().toString() + "%%i:" + index + "%%");
+		}
+		
+	}
+	
 }
  

@@ -49,7 +49,7 @@ public class Messages {
 			userId = userInfo.getAsString("wefriendsid");
 	}
 	
-	static public String timestrampToString(long timestramp) {
+	static synchronized public String timestrampToString(long timestramp) {
 		if (new SimpleDateFormat("yyyy/MM/dd").format(timestramp*1000).equals(new SimpleDateFormat("yyyy/MM/dd").format(System.currentTimeMillis())))
 			return new SimpleDateFormat("HH:mm").format(timestramp*1000);
 		else
@@ -84,7 +84,7 @@ public class Messages {
 		return FAILED;
 	}
 	
-	public List<ContentValues> updateContactListWithNewMessages(List<ContentValues> srcList) {
+	public synchronized List<ContentValues> updateContactListWithNewMessages(List<ContentValues> srcList) {
 		List<ContentValues> newList = new ArrayList<ContentValues>();
 		int contactCount = srcList.size();
 		for (int i=0;i<contactCount;i++) {
@@ -96,7 +96,7 @@ public class Messages {
 		return newList;
 	}
 	
-	public int getNonHandledMessageCountWith(String sender, String chatGroup) {	
+	public synchronized int getNonHandledMessageCountWith(String sender, String chatGroup) {	
 		try {
 			SQLiteDatabase db = database.getReadableDatabase();
 			Cursor cursor = null;
@@ -114,7 +114,7 @@ public class Messages {
 		}
 	}
 	
-	public List<ContentValues> getAllCachedNonHandledMessage() {	
+	public synchronized List<ContentValues> getAllCachedNonHandledMessage() {	
 		List<ContentValues> resultList = new ArrayList<ContentValues>();
 		SQLiteDatabase db = database.getReadableDatabase();
 		try {
@@ -143,7 +143,7 @@ public class Messages {
 		return resultList;
 	}
 	
-	public String getLastMessageFrom(String sender, String chatGroup) {
+	public synchronized String getLastMessageFrom(String sender, String chatGroup) {
 		SQLiteDatabase db = database.getReadableDatabase();
 		try {
 			Cursor cursor = null;
@@ -167,7 +167,7 @@ public class Messages {
 		}
 	}
 	
-	public long getLastMessageTimestramp(String sender, String chatGroup) {
+	public synchronized long getLastMessageTimestramp(String sender, String chatGroup) {
 		SQLiteDatabase db = database.getReadableDatabase();
 		try {
 			Cursor cursor = null;
@@ -191,7 +191,7 @@ public class Messages {
 		}
 	}
 	
-	public List<ContentValues> getAndSaveNewMessages() {
+	public synchronized List<ContentValues> getAndSaveNewMessages() {
 		String accessToken = users.getCachedAccessToken();
 		HttpRequest.Response response = new HttpRequest.Response();
 		String requestURL = "http://" + m_context.getString(R.string.server_host) + ":" + m_context.getString(R.string.server_web_service_port) + "/messages/getnewmessages?accesstoken=" + accessToken;
@@ -240,7 +240,7 @@ public class Messages {
 		return null;
 	}
 	
-	public List<ContentValues> getCachedNonHandledMessages(String messageType, String sender, String chatGroup) {
+	public synchronized List<ContentValues> getCachedNonHandledMessages(String messageType, String sender, String chatGroup) {
 		List<ContentValues> src = getCachedMessages(messageType, sender, chatGroup,0);
 		List<ContentValues> newList = new ArrayList<ContentValues>();
 		int msgCnt = src.size();
@@ -321,13 +321,13 @@ public class Messages {
 		return resultList;
 	}
 	
-	public void bindNotification(String messageId, int notificationId) {
+	public synchronized void bindNotification(String messageId, int notificationId) {
 		SQLiteDatabase db = database.getWritableDatabase();
 		db.execSQL("UPDATE messagecache SET notificationid=" + notificationId + " WHERE messageid='" + messageId + "'");
 		db.close();
 	}
 
-    public String generateMessageId() {
+    public synchronized String generateMessageId() {
         String allChar = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     	int length = 32;
 	    StringBuffer sb = new StringBuffer();
@@ -339,7 +339,7 @@ public class Messages {
 	    return sb.toString();
     }
     
-    public void markMessagesAsRead(String contact, String chatGroup) {
+    public synchronized void markMessagesAsRead(String contact, String chatGroup) {
     	SQLiteDatabase db = database.getWritableDatabase();
     	try {
 	    	if (chatGroup.equals("")) {

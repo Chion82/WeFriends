@@ -20,7 +20,7 @@ public class Chats {
 		database = new DatabaseHelper(context,"wefriendsdb");
 	}
 	
-	public List<ContentValues> getChatList() {
+	public synchronized List<ContentValues> getChatList() {
 		SQLiteDatabase db = database.getReadableDatabase();
 		Cursor cursor = db.rawQuery("SELECT * from chats ORDER BY addtime DESC", new String[]{});
 		List<ContentValues> list = new ArrayList<ContentValues>();
@@ -37,7 +37,7 @@ public class Chats {
 		return list;
 	}
 	
-	public boolean isChatFound(String contact, String chatGroup) {
+	public synchronized boolean isChatFound(String contact, String chatGroup) {
 		SQLiteDatabase db = database.getReadableDatabase();
 		Cursor cursor = null;
 		boolean result = false;
@@ -57,7 +57,7 @@ public class Chats {
 		return result;
 	}
 	
-	public void addChat(ContentValues chatInfo) {
+	public synchronized void addChat(ContentValues chatInfo) {
 		SQLiteDatabase db = database.getWritableDatabase();
 		String contact = chatInfo.getAsString("contact");
 		String chatGroup = chatInfo.getAsString("chatgroup");
@@ -74,7 +74,7 @@ public class Chats {
 		db.close();
 	}
 	
-	public void importFromNewMessages(List<ContentValues> messages) {
+	public synchronized void importFromNewMessages(List<ContentValues> messages) {
 		int messageCount = messages.size();
 		for (int i=messageCount-1;i>=0;i--) {
 			ContentValues messageInfo = messages.get(i);
