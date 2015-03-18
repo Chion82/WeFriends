@@ -36,7 +36,6 @@ public class EmojiEditText extends EditText {
 		//text = EmojiUtils.convertTag(text);
 		CharSequence spanned = Html.fromHtml(text, emojiGetter, null);
 		setText(spanned);
-		Log.d("WeFriends","text=" + getText().toString());
 	}
 	
 	public String getHtml() {

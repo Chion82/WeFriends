@@ -52,7 +52,7 @@
 	            android:layout_width="30dp"
 	            android:layout_height="30dp"
 	            android:background="@drawable/emotion"
-	            android:layout_marginRight="5dp" />
+	            android:layout_marginRight="10dp" />
 	        
 	        <Button
 	            android:id="@+id/chat_plus_button"
@@ -82,8 +82,8 @@
 	        
 	        <Button
 	            android:id="@+id/chat_voice_button"
-	            android:layout_width="40dp"
-	            android:layout_height="40dp"
+	            android:layout_width="30dp"
+	            android:layout_height="30dp"
 	            android:background="@drawable/voice"
 	            android:visibility="visible" />
 	    </LinearLayout>

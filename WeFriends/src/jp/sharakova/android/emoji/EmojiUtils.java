@@ -51,11 +51,6 @@ public class EmojiUtils {
 		.replaceAll("%%i:43%%","<img src=\"e43\"/>")
 		.replaceAll("%%i:44%%","<img src=\"e44\"/>")
 		.replaceAll("%%i:45%%","<img src=\"e45\"/>")
-		.replaceAll("%%i:46%%","<img src=\"e46\"/>")
-		.replaceAll("%%i:47%%","<img src=\"e47\"/>")
-		.replaceAll("%%i:48%%","<img src=\"e48\"/>")
-		.replaceAll("%%i:49%%","<img src=\"e49\"/>")
-		.replaceAll("%%i:50%%","<img src=\"e50\"/>")
 		;
 	}
 }

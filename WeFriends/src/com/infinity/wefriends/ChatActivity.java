@@ -373,7 +373,7 @@ public class ChatActivity extends ActionBarActivity {
 	
 	protected void loadAllEmoji() {
 		WrapViewGroup emojiViewGroup = (WrapViewGroup)findViewById(R.id.chat_emoji_container);
-		for (int i=1;i<=50;i++) {
+		for (int i=1;i<=45;i++) {
 			ImageView emojiBtn = new ImageView(this);
 			emojiBtn.setImageResource(R.drawable.e01 + (i-1));
 			emojiBtn.setOnClickListener(new EmojiOnClickListener(i));		
