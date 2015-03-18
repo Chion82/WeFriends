@@ -3,10 +3,14 @@ package com.infinity.wefriends.apis;
 import java.io.File;
 import java.io.IOException;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.CancellationSignal;
 import android.util.Log;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
@@ -16,19 +20,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 	@Override
 	public synchronized SQLiteDatabase getReadableDatabase() {
-		//waitForFreeDatabase();
+		//waitForFreeDatabase("getReadableDatabase()");
 		return super.getReadableDatabase();
 	}
 
 	@Override
 	public synchronized SQLiteDatabase getWritableDatabase() {
-		//waitForFreeDatabase();
+		//waitForFreeDatabase("getWritableDatabase()");
 		return super.getWritableDatabase();
 	}
 
 	@Override
 	public synchronized void close() {
-		//freeDatabase();
+		freeDatabase();
 		super.close();
 	}
 
@@ -55,13 +59,64 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		// TODO Auto-generated method stub
 		
 	}
 	
-	protected void waitForFreeDatabase() {
+	public synchronized void safeClose(SQLiteDatabase db) {
+		freeDatabase();
+		db.close();
+	}
+	
+	public synchronized Cursor safeRawQuery(SQLiteDatabase db, String sql, String[] selectionArgs) throws SQLException {
+		waitForFreeDatabase("safeRawQuery()" + ";sql=" + sql);
+		return db.rawQuery(sql, selectionArgs);
+	}
+	
+	public synchronized void safeExecSQL(SQLiteDatabase db, String sql) throws SQLException {
+		waitForFreeDatabase("safeExecSQL()" + ";sql=" + sql);
+		db.execSQL(sql);
+	}
+	
+	public synchronized long safeInsert(SQLiteDatabase db, String table, String nullColumnHack, ContentValues values) {
+		waitForFreeDatabase("safeInsert()");
+		return db.insert(table, nullColumnHack, values);
+	}
+	
+	public synchronized int safeDelete(SQLiteDatabase db, String table, String whereClause, String[] whereArgs) {
+		waitForFreeDatabase("safeDelete()");
+		return db.delete(table, whereClause, whereArgs);
+	}
+	
+	public synchronized int safeUpdate(SQLiteDatabase db, String table, ContentValues values, String whereClause, String[] whereArgs) {
+		waitForFreeDatabase("safeUpdate()");
+		return db.update(table, values, whereClause, whereArgs);
+	}
+	
+/*	public synchronized Cursor safeQuery(SQLiteDatabase db, boolean distinct, String table, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy, String limit, 
+			 CancellationSignal cancellationSignal) {
+		waitForFreeDatabase();
+		return db.query(distinct, table, columns, selection, selectionArgs, groupBy, having, orderBy, limit, cancellationSignal);
+	}*/
+	
+	public synchronized Cursor safeQuery(SQLiteDatabase db, String table, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy) {
+		waitForFreeDatabase("safeQuery()");
+		return db.query(table, columns, selection, selectionArgs, groupBy, having, orderBy);
+	}
+	
+	public synchronized Cursor safeQuery(SQLiteDatabase db, String table, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy, String limit) {
+		waitForFreeDatabase("safeQuery()");
+		return db.query(table, columns, selection, selectionArgs, groupBy, having, orderBy, limit);
+	}
+	
+	public synchronized Cursor safeQuery(SQLiteDatabase db ,boolean distinct, String table, String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String orderBy, String limit) {
+		waitForFreeDatabase("safeQuery()");
+		return db.query(distinct, table, columns, selection, selectionArgs, groupBy, having, orderBy, limit);
+	}
+	
+	protected void waitForFreeDatabase(String method) {
 		while (new File(lockFile).exists()) {
 			Log.d("WeFriendsDatabase","Database occupied. Waiting.");
+			Log.d("WeFriendsDatabase","at DatabaseHelper." + method);
 			try {
 				Thread.sleep(50);
 			} catch (InterruptedException e) {
@@ -75,8 +130,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		}
 	}
 	
-	protected void freeDatabase() {
-		new File(lockFile).delete();
+	public void freeDatabase() {
+		File file = new File(lockFile);
+		while (file.exists())
+			file.delete();
 	}
-	
 }

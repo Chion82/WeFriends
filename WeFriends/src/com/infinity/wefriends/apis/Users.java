@@ -41,19 +41,19 @@ public class Users {
 		database = new DatabaseHelper(context,"wefriendsdb");
 	}
 	
-	public synchronized int authenticateCachedAccessToken() {
+	public int authenticateCachedAccessToken() {
 		SQLiteDatabase db = database.getReadableDatabase();
-		Cursor cursor = db.query("usercache", new String[]{"accesstoken"}, "", new String[]{}, "", "", "", "1");
+		Cursor cursor = database.safeQuery(db, "usercache", new String[]{"accesstoken"}, "", new String[]{}, "", "", "", "1");
 		if (!cursor.moveToNext()) {
-			db.close();
+			database.safeClose(db);
 			return TOKEN_INVALID;
 		}
 		String accessToken = cursor.getString(cursor.getColumnIndex("accesstoken"));
-		db.close();
+		database.safeClose(db);
 		return authenticateAccessToken(accessToken);
 	}
 	
-	public synchronized int authenticateAccessToken(String accessToken) {
+	public int authenticateAccessToken(String accessToken) {
 		HttpRequest.Response response = new HttpRequest.Response();
 		String requestURL = "http://" + m_context.getString(R.string.server_host) + ":" + m_context.getString(R.string.server_web_service_port) + "/users/getuserinfobytoken?accesstoken=" + accessToken;
 		if(HttpRequest.get(requestURL,response) == HttpRequest.HTTP_FAILED)
@@ -66,13 +66,12 @@ public class Users {
 				return TOKEN_INVALID;
 			}
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return CONNECTION_ERROR;
 	}
 	
-	public synchronized int login(String phone, String password) {
+	public int login(String phone, String password) {
 		HttpRequest.Response response = new HttpRequest.Response();
 		String requestURL = "http://" + m_context.getString(R.string.server_host) + ":" + m_context.getString(R.string.server_web_service_port) + "/users/login";
 		List<NameValuePair> postFields = new ArrayList<NameValuePair>();
@@ -86,7 +85,7 @@ public class Users {
 			if (jsonObj.getInt("status")==200) {
 				JSONObject userInfo = jsonObj.getJSONObject("userinfo");
 				SQLiteDatabase db = database.getWritableDatabase();
-				db.execSQL("DELETE FROM usercache");
+				database.safeExecSQL(db, "DELETE FROM usercache");
 				ContentValues values = new ContentValues();
 				values.put("accesstoken", jsonObj.getString("accesstoken"));			
 				values.put("wefriendsid", URLDecoder.decode(userInfo.getString("wefriendsid"),"utf-8"));
@@ -99,27 +98,25 @@ public class Users {
 				values.put("region", URLDecoder.decode(userInfo.getString("region"),"utf-8"));
 				values.put("collegeid", URLDecoder.decode(userInfo.getString("collegeid"),"utf-8"));
 				values.put("whatsup", URLDecoder.decode(userInfo.getString("whatsup"),"utf-8"));
-				db.insert("usercache", "", values);
-				db.close();
+				database.safeInsert(db, "usercache", "", values);
+				database.safeClose(db);
 				return LOGIN_OK;
 			} else {
 				return LOGIN_FAILED;
 			}
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return CONNECTION_ERROR;
 	}
 	
-	public synchronized ContentValues  getCachedUserInfo() {
+	public ContentValues  getCachedUserInfo() {
 		SQLiteDatabase db = database.getReadableDatabase();
-		Cursor cursor = db.query("usercache", new String[]{"wefriendsid","nickname","avatar","phone","email","intro","gender","region","collegeid","whatsup"}, "", new String[]{}, "", "", "","1");
+		Cursor cursor = database.safeQuery(db, "usercache", new String[]{"wefriendsid","nickname","avatar","phone","email","intro","gender","region","collegeid","whatsup"}, "", new String[]{}, "", "", "","1");
 		if (!cursor.moveToNext()) {
-			db.close();
+			database.safeClose(db);
 			return null;
 		}
 		ContentValues values = new ContentValues();
@@ -133,11 +130,11 @@ public class Users {
 		values.put("region", cursor.getString(cursor.getColumnIndex("region")));
 		values.put("collegeid", cursor.getString(cursor.getColumnIndex("collegeid")));
 		values.put("whatsup", cursor.getString(cursor.getColumnIndex("whatsup")));
-		db.close();
+		database.safeClose(db);
 		return values;
 	}
 	
-	public synchronized ContentValues getAndSaveUserInfo() {
+	public ContentValues getAndSaveUserInfo() {
 		HttpRequest.Response response = new HttpRequest.Response();
 		String accessToken = getCachedAccessToken();
 		String requestURL = "http://" + m_context.getString(R.string.server_host) + ":" + m_context.getString(R.string.server_web_service_port) + "/users/getuserinfobytoken?accesstoken=" + accessToken;
@@ -163,24 +160,23 @@ public class Users {
 			values.put("region", URLDecoder.decode(userInfo.getString("region"),"utf-8"));
 			values.put("collegeid", URLDecoder.decode(userInfo.getString("collegeid"),"utf-8"));
 			values.put("whatsup", URLDecoder.decode(userInfo.getString("whatsup"),"utf-8"));
-			db.update("usercache", values, "", new String[]{});
-			db.close();
+			database.safeUpdate(db, "usercache", values, "", new String[]{});
+			updateMessagesAndChatsInfo(values, db);
+			database.safeClose(db);
 			return values;
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
 	}
 	
-	public synchronized List<ContentValues> getCachedFriendList() {
+	public List<ContentValues> getCachedFriendList() {
 		SQLiteDatabase db = database.getReadableDatabase();
-		Cursor cursor = db.query("friendscache", new String[]{"wefriendsid", "nickname", "avatar", "whatsup", "intro", "gender", "region", "collegeid", "friendgroup"}, "", new String[]{}, "", "", "");
+		Cursor cursor = database.safeQuery(db, "friendscache", new String[]{"wefriendsid", "nickname", "avatar", "whatsup", "intro", "gender", "region", "collegeid", "friendgroup"}, "", new String[]{}, "", "", "");
 		if (cursor.getCount() == 0) {
-			db.close();
+			database.safeClose(db);
 			return null;
 		}
 		List<ContentValues> list = new ArrayList<ContentValues>();
@@ -198,11 +194,11 @@ public class Users {
 			friendInfo.put("friendgroup", cursor.getString(cursor.getColumnIndex("friendgroup")));
 			list.add(friendInfo);
 		}
-		db.close();
+		database.safeClose(db);
 		return list;
 	}
 	
-	public synchronized List<ContentValues> getAndSaveFriendList() {
+	public List<ContentValues> getAndSaveFriendList() {
 		String accessToken = getCachedAccessToken();
 		HttpRequest.Response response = new HttpRequest.Response();
 		String requestURL = "http://" + m_context.getString(R.string.server_host) + ":" + m_context.getString(R.string.server_web_service_port) + "/users/getfriendlist?accesstoken=" + accessToken;
@@ -216,7 +212,7 @@ public class Users {
 				return null;
 			}
 			SQLiteDatabase db = database.getWritableDatabase();
-			db.execSQL("DELETE FROM friendscache");
+			database.safeExecSQL(db, "DELETE FROM friendscache");
 			JSONArray friendArray = jsonObj.getJSONArray("friendlist");
 			JSONObject person = null;
 			ContentValues info = null;
@@ -234,29 +230,27 @@ public class Users {
 				info.put("region", URLDecoder.decode(person.getString("region"),"utf-8"));
 				info.put("collegeid", URLDecoder.decode(person.getString("collegeid"),"utf-8"));
 				info.put("friendgroup", URLDecoder.decode(person.getString("friendgroup"),"utf-8"));
-				db.insert("friendscache", "", info);
+				database.safeInsert(db, "friendscache", "", info);
 				friendList.add(info);
 				updateMessagesAndChatsInfo(info,db);
 			}
-			db.close();
+			database.safeClose(db);
 			return friendList;
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
 	}
 	
-	public synchronized void updateMessagesAndChatsInfo(ContentValues info, SQLiteDatabase db) {
+	public void updateMessagesAndChatsInfo(ContentValues info, SQLiteDatabase db) {
 		try {
-			db.execSQL("UPDATE messagecache SET sendernickname='"
+			database.safeExecSQL(db, "UPDATE messagecache SET sendernickname='"
 					+ info.getAsString("nickname") + "',senderavatar='"
 					+ info.getAsString("avatar") + "' WHERE sender='"
 					+ info.getAsString("wefriendsid") + "'");
-			db.execSQL("UPDATE chats SET contactnickname='"
+			database.safeExecSQL(db, "UPDATE chats SET contactnickname='"
 					+ info.getAsString("nickname") + "',contactavatar='"
 					+ info.getAsString("avatar") + "' WHERE contact='"
 					+ info.getAsString("wefriendsid") + "'");		
@@ -266,16 +260,16 @@ public class Users {
 		}
 	}
 	
-	public synchronized String getCachedAccessToken() {
+	public String getCachedAccessToken() {
 		SQLiteDatabase db = database.getReadableDatabase();
-		Cursor cursor = db.query("usercache", new String[]{"accesstoken"}, "", new String[]{}, "", "", "", "1");
+		Cursor cursor = database.safeQuery(db ,"usercache", new String[]{"accesstoken"}, "", new String[]{}, "", "", "", "1");
 		if (!cursor.moveToNext()) {
-			db.close();
+			database.safeClose(db);
 			broadcastReLoginAction();
 			return "";
 		}
 		String accessToken = cursor.getString(cursor.getColumnIndex("accesstoken"));
-		db.close();
+		database.safeClose(db);
 		return accessToken;
 	}
 	

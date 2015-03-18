@@ -49,14 +49,14 @@ public class Messages {
 			userId = userInfo.getAsString("wefriendsid");
 	}
 	
-	static synchronized public String timestrampToString(long timestramp) {
+	static public String timestrampToString(long timestramp) {
 		if (new SimpleDateFormat("yyyy/MM/dd").format(timestramp*1000).equals(new SimpleDateFormat("yyyy/MM/dd").format(System.currentTimeMillis())))
 			return new SimpleDateFormat("HH:mm").format(timestramp*1000);
 		else
 			return new SimpleDateFormat("yyyy/MM/dd HH:mm").format(timestramp*1000);
 	}
 	
-	public synchronized int sendMessage(ContentValues message) {
+	public int sendMessage(ContentValues message) {
 		HttpRequest.Response response = new HttpRequest.Response();
 		String requestURL = "http://" + m_context.getString(R.string.server_host) + ":" + m_context.getString(R.string.server_web_service_port) + "/messages/sendmessage";
 		List<NameValuePair> postFields = new ArrayList<NameValuePair>();
@@ -74,8 +74,8 @@ public class Messages {
 				return FAILED;
 			} else {
 				SQLiteDatabase db = database.getWritableDatabase();
-				db.insert("messagecache","",message);
-				db.close();
+				database.safeInsert(db, "messagecache","",message);
+				database.safeClose(db);
 				return SUCCESS;
 			}
 		} catch (JSONException e) {
@@ -84,7 +84,7 @@ public class Messages {
 		return FAILED;
 	}
 	
-	public synchronized List<ContentValues> updateContactListWithNewMessages(List<ContentValues> srcList) {
+	public List<ContentValues> updateContactListWithNewMessages(List<ContentValues> srcList) {
 		List<ContentValues> newList = new ArrayList<ContentValues>();
 		int contactCount = srcList.size();
 		for (int i=0;i<contactCount;i++) {
@@ -96,29 +96,30 @@ public class Messages {
 		return newList;
 	}
 	
-	public synchronized int getNonHandledMessageCountWith(String sender, String chatGroup) {	
+	public int getNonHandledMessageCountWith(String sender, String chatGroup) {
+		SQLiteDatabase db = database.getReadableDatabase();
 		try {
-			SQLiteDatabase db = database.getReadableDatabase();
 			Cursor cursor = null;
 			if (chatGroup.equals(""))
-				cursor = db.rawQuery("SELECT * FROM messagecache WHERE ( (sender='"+sender+"') OR (sender='" + userId + "' AND receivers='" + sender + "' ) ) AND chatgroup='' AND ishandled=0 ORDER BY timestramp DESC", new String[]{});
+				cursor = database.safeRawQuery(db, "SELECT * FROM messagecache WHERE ( (sender='"+sender+"') OR (sender='" + userId + "' AND receivers='" + sender + "' ) ) AND chatgroup='' AND ishandled=0 ORDER BY timestramp DESC", new String[]{});
 			else
-				cursor = db.rawQuery("SELECT * FROM messagecache WHERE chatgroup='" + chatGroup + "' AND ishandled=0 ORDER BY timestramp DESC", new String[]{});
+				cursor = database.safeRawQuery(db ,"SELECT * FROM messagecache WHERE chatgroup='" + chatGroup + "' AND ishandled=0 ORDER BY timestramp DESC", new String[]{});
 			int count = cursor.getCount();
-			db.close();
+			database.safeClose(db);
 			return count;
 		} catch (SQLException e) {
 			Log.e("WeFriends","SQLException at Messages.getNonHandledMessageCountWith");
 			Log.e("WeFriends",e.getMessage());
-			return 0;
 		}
+		database.safeClose(db);
+		return 0;
 	}
 	
-	public synchronized List<ContentValues> getAllCachedNonHandledMessage() {	
+	public List<ContentValues> getAllCachedNonHandledMessage() {	
 		List<ContentValues> resultList = new ArrayList<ContentValues>();
 		SQLiteDatabase db = database.getReadableDatabase();
 		try {
-			Cursor cursor = db.rawQuery("SELECT * FROM messagecache WHERE ishandled=0 ORDER BY timestramp DESC", new String[]{});
+			Cursor cursor = database.safeRawQuery(db, "SELECT * FROM messagecache WHERE ishandled=0 ORDER BY timestramp DESC", new String[]{});
 			while (cursor.moveToNext()) {
 				ContentValues value = new ContentValues();
 				value.put("sender", cursor.getString(cursor.getColumnIndex("sender")));
@@ -139,59 +140,59 @@ public class Messages {
 			Log.e("WeFriends","SQLException at Messages.getNonHandledMessageCountWith");
 			Log.e("WeFriends",e.getMessage());
 		}
-		db.close();
+		database.safeClose(db);
 		return resultList;
 	}
 	
-	public synchronized String getLastMessageFrom(String sender, String chatGroup) {
+	public String getLastMessageFrom(String sender, String chatGroup) {
 		SQLiteDatabase db = database.getReadableDatabase();
 		try {
 			Cursor cursor = null;
 			if (chatGroup.equals(""))
-				cursor = db.rawQuery("SELECT * FROM messagecache WHERE ( (sender='"+sender+"') OR (sender='" + userId + "' AND receivers='" + sender + "' ) ) AND chatgroup='' ORDER BY timestramp DESC LIMIT 1", new String[]{});
+				cursor = database.safeRawQuery(db, "SELECT * FROM messagecache WHERE ( (sender='"+sender+"') OR (sender='" + userId + "' AND receivers='" + sender + "' ) ) AND chatgroup='' ORDER BY timestramp DESC LIMIT 1", new String[]{});
 			else
-				cursor = db.rawQuery("SELECT * FROM messagecache WHERE chatgroup='" + chatGroup + "' ORDER BY timestramp DESC LIMIT 1", new String[]{});
+				cursor = database.safeRawQuery(db, "SELECT * FROM messagecache WHERE chatgroup='" + chatGroup + "' ORDER BY timestramp DESC LIMIT 1", new String[]{});
 			
 			if (!cursor.moveToNext()) {
-				db.close();
+				database.safeClose(db);
 				return "";
 			}
 			String message = cursor.getString(cursor.getColumnIndex("message"));
-			db.close();
+			database.safeClose(db);
 			return message;
 		} catch (SQLException e) {
-			db.close();
+			database.safeClose(db);
 			Log.e("WeFriends","SQLException at Messages.getLastMessageFrom");
 			Log.e("WeFriends",e.getMessage());
 			return "";
 		}
 	}
 	
-	public synchronized long getLastMessageTimestramp(String sender, String chatGroup) {
+	public long getLastMessageTimestramp(String sender, String chatGroup) {
 		SQLiteDatabase db = database.getReadableDatabase();
 		try {
 			Cursor cursor = null;
 			if (chatGroup.equals(""))
-				cursor = db.rawQuery("SELECT * FROM messagecache WHERE ( (sender='"+sender+"') OR (sender='" + userId + "' AND receivers='" + sender + "' ) ) AND chatgroup='' ORDER BY timestramp DESC LIMIT 1", new String[]{});
+				cursor = database.safeRawQuery(db, "SELECT * FROM messagecache WHERE ( (sender='"+sender+"') OR (sender='" + userId + "' AND receivers='" + sender + "' ) ) AND chatgroup='' ORDER BY timestramp DESC LIMIT 1", new String[]{});
 			else
-				cursor = db.rawQuery("SELECT * FROM messagecache WHERE chatgroup='" + chatGroup + "' ORDER BY timestramp DESC LIMIT 1", new String[]{});
+				cursor = database.safeRawQuery(db ,"SELECT * FROM messagecache WHERE chatgroup='" + chatGroup + "' ORDER BY timestramp DESC LIMIT 1", new String[]{});
 			
 			if (!cursor.moveToNext()) {
-				db.close();
+				database.safeClose(db);
 				return -1;
 			}
 			long timestramp = cursor.getLong(cursor.getColumnIndex("timestramp"));
-			db.close();
+			database.safeClose(db);
 			return timestramp;
 		} catch (SQLException e) {
-			db.close();
+			database.safeClose(db);
 			Log.e("WeFriends","SQLException at Messages.getLastMessageFrom");
 			Log.e("WeFriends",e.getMessage());
 			return -1;
 		}
 	}
 	
-	public synchronized List<ContentValues> getAndSaveNewMessages() {
+	public List<ContentValues> getAndSaveNewMessages() {
 		String accessToken = users.getCachedAccessToken();
 		HttpRequest.Response response = new HttpRequest.Response();
 		String requestURL = "http://" + m_context.getString(R.string.server_host) + ":" + m_context.getString(R.string.server_web_service_port) + "/messages/getnewmessages?accesstoken=" + accessToken;
@@ -226,21 +227,20 @@ public class Messages {
 				message.put("notificationid", 0);
 				message.put("messageid", generateMessageId());
 				messageList.add(message);
-				db.insert("messagecache", "", message);
+				database.safeInsert(db, "messagecache", "", message);
 			}
-			db.close();
+			database.safeClose(db);
 			return messageList;
 			
 		} catch (JSONException e) {
 			e.printStackTrace();
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
 	}
 	
-	public synchronized List<ContentValues> getCachedNonHandledMessages(String messageType, String sender, String chatGroup) {
+	public List<ContentValues> getCachedNonHandledMessages(String messageType, String sender, String chatGroup) {
 		List<ContentValues> src = getCachedMessages(messageType, sender, chatGroup,0);
 		List<ContentValues> newList = new ArrayList<ContentValues>();
 		int msgCnt = src.size();
@@ -252,7 +252,7 @@ public class Messages {
 		return newList;
 	}
 	
-	public synchronized List<ContentValues> getCachedMessages(String messageType, String sender, String chatGroup, int page) {
+	public List<ContentValues> getCachedMessages(String messageType, String sender, String chatGroup, int page) {
 		Cursor cursor = null;
 		String selectionStr = "";
 		boolean firstSelection = true;
@@ -280,9 +280,9 @@ public class Messages {
 		//Log.d("WeFriends","sql=" + sqlStr);
 		SQLiteDatabase db = database.getReadableDatabase();
 		try {
-			cursor = db.rawQuery(sqlStr, new String[]{});
+			cursor = database.safeRawQuery(db, sqlStr, new String[]{});
 		} catch (Exception e) {
-			db.close();
+			database.safeClose(db);
 			Log.e("WeFriends","SQL Exception at Messages.getCachedMessages");
 			Log.e("WeFriends",e.getMessage());
 			Log.e("WeFriends","SQL="+sqlStr);
@@ -306,7 +306,7 @@ public class Messages {
 			value.put("receivers", cursor.getString(cursor.getColumnIndex("receivers")));
 			resultList.add(value);
 		}
-		db.close();
+		database.safeClose(db);
 		
 		if (page==0) {
 			return resultList;
@@ -321,13 +321,13 @@ public class Messages {
 		return resultList;
 	}
 	
-	public synchronized void bindNotification(String messageId, int notificationId) {
+	public void bindNotification(String messageId, int notificationId) {
 		SQLiteDatabase db = database.getWritableDatabase();
-		db.execSQL("UPDATE messagecache SET notificationid=" + notificationId + " WHERE messageid='" + messageId + "'");
-		db.close();
+		database.safeExecSQL(db, "UPDATE messagecache SET notificationid=" + notificationId + " WHERE messageid='" + messageId + "'");
+		database.safeClose(db);
 	}
 
-    public synchronized String generateMessageId() {
+    public String generateMessageId() {
         String allChar = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     	int length = 32;
 	    StringBuffer sb = new StringBuffer();
@@ -339,22 +339,22 @@ public class Messages {
 	    return sb.toString();
     }
     
-    public synchronized void markMessagesAsRead(String contact, String chatGroup) {
+    public void markMessagesAsRead(String contact, String chatGroup) {
     	SQLiteDatabase db = database.getWritableDatabase();
     	try {
 	    	if (chatGroup.equals("")) {
-	    		db.execSQL("UPDATE messagecache SET ishandled=1 WHERE chatgroup='' AND sender='" + contact + "'");
+	    		database.safeExecSQL(db, "UPDATE messagecache SET ishandled=1 WHERE chatgroup='' AND sender='" + contact + "'");
 	    	} else {
-	    		db.execSQL("UPDATE messagecache SET ishandled=1 WHERE chatgroup='" + chatGroup + "'");
+	    		database.safeExecSQL(db, "UPDATE messagecache SET ishandled=1 WHERE chatgroup='" + chatGroup + "'");
 	    	}
     	} catch (SQLException e) {
 			Log.e("WeFriends","SQLException at Messages.markMessagesAsRead");
 			Log.e("WeFriends",e.getMessage());
     	}
-    	db.close();
+    	database.safeClose(db);
     }
     
-    public synchronized List<ContentValues> getChatHistory(String contact, String chatGroup, int page) {
+    public List<ContentValues> getChatHistory(String contact, String chatGroup, int page) {
     	SQLiteDatabase db = database.getReadableDatabase();
     	List<ContentValues> historyList = new ArrayList<ContentValues>();
     	String sql = null;
@@ -369,7 +369,7 @@ public class Messages {
     		sql += (" LIMIT " + page*15);
     	}
     	try {
-    		cursor = db.rawQuery(sql, new String[]{});
+    		cursor = database.safeRawQuery(db, sql, new String[]{});
     		while (cursor.moveToNext()) {
     			ContentValues value = new ContentValues();
     			value.put("sender", cursor.getString(cursor.getColumnIndex("sender")));
@@ -389,7 +389,7 @@ public class Messages {
     		Log.e("WeFriends","SQLException at Messages.getChatHistory");
     		Log.e("WeFriends",e.getMessage());
     	}
-    	db.close();
+    	database.safeClose(db);
     	if (page>0) {
     		int skipCount = (page-1) * 15;
     		for (int i=0;i<skipCount;i++) {
