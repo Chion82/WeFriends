@@ -17,7 +17,7 @@ public class Chats {
 	
 	public Chats(Context context) {
 		m_context = context;
-		database = new DatabaseHelper(context,"wefriendsdb");
+		database = DatabaseHelper.getInstance(context,"wefriendsdb");
 	}
 	
 	public List<ContentValues> getChatList() {

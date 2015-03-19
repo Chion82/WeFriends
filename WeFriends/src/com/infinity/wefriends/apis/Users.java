@@ -38,7 +38,7 @@ public class Users {
 	
 	public Users(Context context) {
 		m_context = context;
-		database = new DatabaseHelper(context,"wefriendsdb");
+		database = DatabaseHelper.getInstance(context,"wefriendsdb");
 	}
 	
 	public int authenticateCachedAccessToken() {

@@ -43,7 +43,7 @@ public class Messages {
 	public Messages(Context context) {
 		m_context = context;
 		users = new Users(context);
-		database = new DatabaseHelper(context,"wefriendsdb");
+		database = DatabaseHelper.getInstance(context,"wefriendsdb");
 		ContentValues userInfo = users.getCachedUserInfo();
 		if (userInfo!=null)
 			userId = userInfo.getAsString("wefriendsid");
@@ -161,11 +161,11 @@ public class Messages {
 			database.safeClose(db);
 			return message;
 		} catch (SQLException e) {
-			database.safeClose(db);
 			Log.e("WeFriends","SQLException at Messages.getLastMessageFrom");
 			Log.e("WeFriends",e.getMessage());
-			return "";
 		}
+		database.safeClose(db);
+		return "";
 	}
 	
 	public long getLastMessageTimestramp(String sender, String chatGroup) {
@@ -185,11 +185,11 @@ public class Messages {
 			database.safeClose(db);
 			return timestramp;
 		} catch (SQLException e) {
-			database.safeClose(db);
 			Log.e("WeFriends","SQLException at Messages.getLastMessageFrom");
 			Log.e("WeFriends",e.getMessage());
-			return -1;
 		}
+		database.safeClose(db);
+		return -1;
 	}
 	
 	public List<ContentValues> getAndSaveNewMessages() {

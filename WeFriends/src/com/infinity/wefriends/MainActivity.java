@@ -80,6 +80,7 @@ public class MainActivity extends ActionBarActivity {
 	
 	protected Messages messagesAPI = null;
 	protected Chats chatsAPI = null;
+	protected boolean allowLoadingOnlineData = false;
 	
 	
 	public void test() {
@@ -117,6 +118,8 @@ public class MainActivity extends ActionBarActivity {
 		messagesAPI = new Messages(this);
 		chatsAPI = new Chats(this);
 		
+		allowLoadingOnlineData = true;
+		
 		contactListView = (AnimatedExpandableListView)friendsView.findViewById(R.id.main_contact_list_view);
 		chatList = (ListView)chatsView.findViewById(R.id.main_chat_list);
 		
@@ -151,12 +154,17 @@ public class MainActivity extends ActionBarActivity {
 		//asyncTask.initCheckUserInfo();
 		super.onResume();
 	}
-
-
+	
+	public void setLoadingOnlineDataEnabled(boolean enabled) {
+		allowLoadingOnlineData = enabled;
+	}
 	
 	public void loadAllOnlineData() {
+		if (!allowLoadingOnlineData)
+			return;
 		Log.d("WeFriends","Loading All Data.");
 		asyncTask.loadOnlineUserInfoAndFriendList();
+		allowLoadingOnlineData = false;
 		
 		//TODO
 		
