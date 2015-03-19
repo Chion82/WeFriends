@@ -13,9 +13,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
@@ -57,7 +59,7 @@ public class ChatListAdapter extends BaseAdapter {
 	}
 
 	@Override
-	public View getView(int pos, View arg1, ViewGroup arg2) {
+	public View getView(final int pos, View arg1, ViewGroup arg2) {
 		final ContentValues chatInfo = chatList.get(pos);
 		View itemView = inflater.inflate(R.layout.contact_list_item_view, null);
 		TextView mainTitle = (TextView)itemView.findViewById(R.id.contact_list_item_view_main_title);
@@ -107,6 +109,16 @@ public class ChatListAdapter extends BaseAdapter {
 				intent.putExtra("chatgroup", chatInfo.getAsString("chatgroup"));
 				intent.setClass(m_context, ChatActivity.class);
 				m_context.startActivity(intent);
+			}
+		});
+		
+		MainActivity.chatsInfo.add(pos, chatInfo);
+		itemView.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
+			@Override
+			public void onCreateContextMenu(ContextMenu menu, View v,
+					ContextMenuInfo menuInfo) {
+				menu.add(MainActivity.CONTEXT_MENU_GROUP_PIN_TO_TOP, pos, 1, R.string.pin_to_top);
+				menu.add(MainActivity.CONTEXT_MENU_GROUP_DELETE_CHAT, pos, 2, R.string.delete_chat);
 			}
 		});
 		

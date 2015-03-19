@@ -32,5 +32,7 @@
     <string name="friend">惟友资料</string>
     
     <string name="send">发送</string>
+    <string name="delete_chat">删除</string>
+    <string name="pin_to_top">置顶</string>
 
 </resources>

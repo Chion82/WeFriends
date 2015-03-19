@@ -74,6 +74,22 @@ public class Chats {
 		database.safeClose(db);
 	}
 	
+	public void deleteChat(ContentValues chatInfo) {
+		SQLiteDatabase db = database.getWritableDatabase();
+		String contact = chatInfo.getAsString("contact");
+		String chatGroup = chatInfo.getAsString("chatgroup");
+		try {
+			if (!chatGroup.equals(""))
+				database.safeExecSQL(db, "DELETE FROM chats WHERE chatgroup='" + chatGroup + "'");
+			else
+				database.safeExecSQL(db, "DELETE FROM chats WHERE contact='"+ contact + "' AND chatgroup=''");
+		} catch (SQLException e) {
+			Log.e("WeFriends","SQL Exception at apis.Chats.deleteChat");
+			Log.e("WeFriends",e.getMessage());
+		}
+		database.safeClose(db);	
+	}
+	
 	public void importFromNewMessages(List<ContentValues> messages) {
 		int messageCount = messages.size();
 		for (int i=messageCount-1;i>=0;i--) {

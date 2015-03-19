@@ -24,12 +24,14 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.OnGroupClickListener;
 import android.widget.HorizontalScrollView;
@@ -51,6 +53,9 @@ public class MainActivity extends ActionBarActivity {
 	public static final int MAIN_LOADONLINECONTACTLIST = 101;
 	public static final int SHOWTOAST =  102;
 	public static final int MAIN_HANDLENEWMESSAGES = 103;
+	
+	public static final int CONTEXT_MENU_GROUP_DELETE_CHAT = 0;
+	public static final int CONTEXT_MENU_GROUP_PIN_TO_TOP = 1;
 
 	public int currentPage = NavBarButton.CHATS;
 	
@@ -197,6 +202,9 @@ public class MainActivity extends ActionBarActivity {
 				return true;
 			}
 		});
+		for (int i=0;i<contactListAdapter.getGroupCount();i++) {
+			contactListView.expandGroup(i);
+		}
 		
 	}
 	
@@ -213,12 +221,31 @@ public class MainActivity extends ActionBarActivity {
 	}
 	
 	public void updateChatList() {
+		MainActivity.chatsInfo.clear();
 		chatsAPI.importFromNewMessages(messagesAPI.getAllCachedNonHandledMessage());
 		List<ContentValues> list = chatsAPI.getChatList();
 		//Log.d("test",list.size()+"");
 		chatList.setAdapter(new ChatListAdapter(this,list));
 	}
-	
+
+	public static List<ContentValues> chatsInfo = new ArrayList<ContentValues>();  
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		switch (item.getGroupId()) {
+		case CONTEXT_MENU_GROUP_DELETE_CHAT:
+			chatsAPI.deleteChat(chatsInfo.get(item.getItemId()));
+			updateChatList();
+			break;
+		case CONTEXT_MENU_GROUP_PIN_TO_TOP:
+			ContentValues chatInfo = chatsInfo.get(item.getItemId());
+			chatInfo.put("addtime", System.currentTimeMillis()/1000);
+			chatsAPI.addChat(chatInfo);
+			updateChatList();
+			break;
+		}
+		return super.onContextItemSelected(item);
+	}
+
 	public void initNotifierService() {
 		Intent intent = new Intent();
 		intent.setClass(this, NotifierService.class);
@@ -253,13 +280,11 @@ public class MainActivity extends ActionBarActivity {
 
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
-			// TODO Auto-generated method stub
 			
 		}
 
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
-			// TODO Auto-generated method stub
 			
 		}
 		
