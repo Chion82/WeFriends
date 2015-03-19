@@ -63,7 +63,9 @@ public class NotifierService extends Service {
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		//Prevent service being killed.
+		Log.d("test","onStartCommand()");
 		flags = Service.START_REDELIVER_INTENT;
+		exitSignal = false;
 		
 		m_context = getApplicationContext();
 		notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
@@ -71,8 +73,10 @@ public class NotifierService extends Service {
 		messagesAPI = new Messages(m_context);
 		ContentValues userInfo = users.getCachedUserInfo();
 		String token = users.getCachedAccessToken();
-		if (userInfo==null || token==null)
+		if (userInfo==null || token==null) {
+			handler.sendEmptyMessage(NotifierService.QUIT_SERVICE);
 			return super.onStartCommand(intent, flags, startId);
+		}
 		accessToken = token;
 		wefriendsId = userInfo.getAsString("wefriendsid");
 		if (serviceThread == null) {
@@ -166,7 +170,6 @@ public class NotifierService extends Service {
 				}
 			} while (connError && (!exitSignal));
 			serviceThread = null;
-			super.run();
 		}
 	}
 	

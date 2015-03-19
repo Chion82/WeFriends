@@ -81,7 +81,7 @@ public class Users {
 			return CONNECTION_ERROR;
 		try {
 			JSONObject jsonObj = new JSONObject(response.getString());
-			Log.d("test",jsonObj.getInt("status")+"");
+			//Log.d("test",jsonObj.getInt("status")+"");
 			if (jsonObj.getInt("status")==200) {
 				JSONObject userInfo = jsonObj.getJSONObject("userinfo");
 				SQLiteDatabase db = database.getWritableDatabase();

@@ -86,7 +86,7 @@ public class Chats {
 			chatInfo.put("chattype", messageInfo.getAsString("messagetype"));
 			chatInfo.put("addtime", messageInfo.getAsString("timestramp"));
 			addChat(chatInfo);
-			Log.d("test","chatgroup=" + messageInfo.getAsString("chatgroup") + ";contactnickmane=" + messageInfo.getAsString("sendernickname"));
+			//Log.d("test","chatgroup=" + messageInfo.getAsString("chatgroup") + ";contactnickmane=" + messageInfo.getAsString("sendernickname"));
 		}
 	}
 
