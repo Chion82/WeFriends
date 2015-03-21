@@ -3,11 +3,17 @@ package com.infinity.wefriends;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.infinity.utils.HttpRequest;
 import com.infinity.wefriends.apis.Messages;
+import com.infinity.wefriends.apis.Users;
 
 import android.content.ContentValues;
 import android.os.Bundle;
 import android.os.Message;
+import android.util.Log;
 import android.view.View;
 
 public class ChatActivityAsyncTask {
@@ -55,6 +61,39 @@ public class ChatActivityAsyncTask {
 				super.run();
 			}
 			
+		}.start();
+	}
+	
+	public void uploadVoice(final String recordFile) {
+		new Thread() {
+			@Override
+			public void run() {
+				HttpRequest.Response response = new HttpRequest.Response();
+				String url = "http://"
+						+ chatActivity.getString(R.string.server_host) + ":" 
+						+ chatActivity.getString(R.string.server_web_service_port)
+						+ "/files/upload";
+				int status = HttpRequest.uploadFile(url, recordFile, "upfile", "application/octet-stream", response);
+				if (status == HttpRequest.HTTP_OK) {
+					//Log.d("WeFriends",response.getString());
+					try {
+						JSONObject jsonObj = new JSONObject(response.getString());
+						if (jsonObj.getInt("status") == 200) {
+							String messageText = jsonObj.getString("url");
+							Message msg = new Message();
+							Bundle bundle = new Bundle();
+							bundle.putString("messagetype", Messages.MESSAGE_VOICE);
+							bundle.putString("messagetext", messageText);
+							msg.what = ChatActivity.SEND_MESSAGE;
+							msg.setData(bundle);
+							chatActivity.handler.sendMessage(msg);
+						}
+					} catch (JSONException e) {
+						e.printStackTrace();
+					}
+				}
+				super.run();
+			}
 		}.start();
 	}
 	

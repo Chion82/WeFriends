@@ -48,6 +48,7 @@
         	android:gravity="center_vertical">
         
 	        <Button
+	            android:layout_marginLeft="5dp"
 	            android:id="@+id/chat_emotion_button"
 	            android:layout_width="30dp"
 	            android:layout_height="30dp"
@@ -85,7 +86,8 @@
 	            android:layout_width="30dp"
 	            android:layout_height="30dp"
 	            android:background="@drawable/voice"
-	            android:visibility="visible" />
+	            android:visibility="visible"
+	            android:layout_marginRight="5dp" />
 	    </LinearLayout>
 	    
       <View
@@ -107,6 +109,28 @@
 	            android:orientation="vertical" />
 
         </ScrollView>
+        
+        <RelativeLayout
+            android:id="@+id/chat_voice_layout"
+            android:layout_width="match_parent"
+            android:layout_height="130dp"
+            android:background="#FFFFFF"
+            android:visibility="gone" >
+	        
+            <Button
+                android:layout_centerInParent="true"
+                android:id="@+id/chat_voice_send_background_background"
+                android:background="@drawable/chat_voice_send_button_background_selector"
+                android:layout_width="100dp"
+                android:layout_height="100dp" />
+            
+            <ImageView
+                android:layout_centerInParent="true"
+                android:src="@drawable/ic_action_microphone"
+                android:layout_width="50dp"
+                android:layout_height="50dp" />
+	        
+        </RelativeLayout>
 		
     </LinearLayout>
     

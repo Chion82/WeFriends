@@ -1,14 +1,18 @@
 package com.infinity.wefriends;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import jp.sharakova.android.emoji.EmojiEditText;
 import jp.sharakova.android.emoji.EmojiTextView;
 
 import com.infinity.utils.Calculations;
 import com.infinity.utils.OnlineImageView;
+import com.infinity.utils.Storage;
 import com.infinity.utils.WrapViewGroup;
 import com.infinity.wefriends.apis.Messages;
 import com.infinity.wefriends.apis.Users;
@@ -20,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
+import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -27,6 +32,7 @@ import android.os.Message;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -35,11 +41,15 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
@@ -50,6 +60,7 @@ public class ChatActivity extends ActionBarActivity {
 	static final public int HISTORY_LOADING_FINISHED = 102;
 	static final public int MESSAGE_SENDING_FINISHED = 103;
 	static final public int MESSAGE_SENDING_FAILED = 104;
+	static final public int SEND_MESSAGE = 105;
 	
 	public String contactId = "";
 	protected String contactNickname = "";
@@ -85,6 +96,10 @@ public class ChatActivity extends ActionBarActivity {
 	protected NotificationManager notificationManager = null;
 	
 	protected boolean isEmotionListVisible = false;
+	protected boolean isVoiceLayoutVisible = false;
+	
+	protected View popupRecordingView = null;
+	protected PopupWindow popupWindow = null;
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -155,11 +170,39 @@ public class ChatActivity extends ActionBarActivity {
 					isEmotionListVisible = false;
 				} else {
 					((ScrollView)findViewById(R.id.chat_emotion_list)).setVisibility(View.VISIBLE);
+					((RelativeLayout)findViewById(R.id.chat_voice_layout)).setVisibility(View.GONE);
+				    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);  
+				    imm.hideSoftInputFromWindow(ChatActivity.this.getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
 					isEmotionListVisible = true;
 				}
 			}
 		});
 		
+		((Button)findViewById(R.id.chat_voice_button)).setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (isVoiceLayoutVisible) {
+					((RelativeLayout)findViewById(R.id.chat_voice_layout)).setVisibility(View.GONE);
+					isVoiceLayoutVisible = false;
+				} else {
+					((RelativeLayout)findViewById(R.id.chat_voice_layout)).setVisibility(View.VISIBLE);
+					((ScrollView)findViewById(R.id.chat_emotion_list)).setVisibility(View.GONE);
+					InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);  
+				    imm.hideSoftInputFromWindow(ChatActivity.this.getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+					isVoiceLayoutVisible = true;
+				}
+			}
+		});
+		
+		LayoutInflater inflater = LayoutInflater.from(this);
+		popupRecordingView = inflater.inflate(R.layout.chat_voice_recording_layout, null);
+		
+		popupWindow = new PopupWindow(popupRecordingView,
+				(int)Calculations.dip2px(ChatActivity.this, 130), 
+				(int)Calculations.dip2px(ChatActivity.this, 130));
+		
+		
+		((Button)findViewById(R.id.chat_voice_send_background_background)).setOnTouchListener(new VoiceRecordingButtonListener());
 		/*UI Initialization Completed*/
 		
 		notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
@@ -197,7 +240,7 @@ public class ChatActivity extends ActionBarActivity {
 			return null;
 		if (!message.getAsString("sender").equals(userId)) {
 			messageView = LayoutInflater.from(this).inflate(R.layout.chat_message_container_remote, null);
-			((OnlineImageView)messageView.findViewById(R.id.chat_message_avatar_remote)).asyncLoadOnlineImage("http://" + getString(R.string.server_host) + ":" + getString(R.string.server_web_service_port) + "/" + message.getAsString("senderavatar"),Environment.getExternalStorageDirectory()+"/wefriends/cache");
+			((OnlineImageView)messageView.findViewById(R.id.chat_message_avatar_remote)).asyncLoadOnlineImage("http://" + getString(R.string.server_host) + ":" + getString(R.string.server_web_service_port) + "/" + message.getAsString("senderavatar"),Storage.getStorageDirectory()+"/wefriends/cache");
 			if (!message.getAsString("chatgroup").equals("")) {
 				TextView senderView = (TextView)messageView.findViewById(R.id.chat_message_contact_nickname);
 				senderView.setVisibility(View.VISIBLE);
@@ -206,7 +249,7 @@ public class ChatActivity extends ActionBarActivity {
 			messageContainerView = (LinearLayout)messageView.findViewById(R.id.chat_message_container_view_remote);
 		} else {
 			messageView = LayoutInflater.from(this).inflate(R.layout.chat_message_container_me, null);
-			((OnlineImageView)messageView.findViewById(R.id.chat_message_avatar_me)).asyncLoadOnlineImage("http://" + getString(R.string.server_host) + ":" + getString(R.string.server_web_service_port) + "/" + message.getAsString("senderavatar"),Environment.getExternalStorageDirectory()+"/wefriends/cache");
+			((OnlineImageView)messageView.findViewById(R.id.chat_message_avatar_me)).asyncLoadOnlineImage("http://" + getString(R.string.server_host) + ":" + getString(R.string.server_web_service_port) + "/" + message.getAsString("senderavatar"),Storage.getStorageDirectory()+"/wefriends/cache");
 			messageContainerView = (LinearLayout)messageView.findViewById(R.id.chat_message_container_view_me);
 		}
 		messageContainerView.addView(getMessageView(message));
@@ -248,15 +291,18 @@ public class ChatActivity extends ActionBarActivity {
 	protected View getMessageView(ContentValues message) {
 		String messageType = message.getAsString("messagetype");
 		if (messageType.equals(Messages.MESSAGE_TEXT)) {
-			//TODO : Display Emoji in textView
 			EmojiTextView textView = new EmojiTextView(this);
 			textView.setEmojiText(message.getAsString("message"));
 			textView.setTextColor(Color.BLACK);
+			if (userId.equals(message.getAsString("sender")))
+				textView.setTextColor(Color.WHITE);
 			return textView;
 		} else if (messageType.equals(Messages.MESSAGE_IMAGE)) {
 			OnlineImageView imageView = new OnlineImageView(this);
-			imageView.asyncLoadOnlineImage("http://" + getString(R.string.server_host) + ":" + getString(R.string.server_web_service_port) + "/" + message.getAsString("message"),Environment.getExternalStorageDirectory()+"/wefriends/cache");
+			imageView.asyncLoadOnlineImage("http://" + getString(R.string.server_host) + ":" + getString(R.string.server_web_service_port) + "/" + message.getAsString("message"),Storage.getStorageDirectory()+"/wefriends/cache");
 			return imageView;
+		} else if (messageType.equals(Messages.MESSAGE_VOICE)) {
+			return new VoiceMessageView(this, message.getAsString("message"), !userId.equals(message.getAsString("sender")));
 		}
 		//TODO : add view for other message types
 		return new TextView(this);
@@ -299,6 +345,10 @@ public class ChatActivity extends ActionBarActivity {
 				View messageView = (View)msg.getData().getParcelableArrayList("messageview").get(0);
 				messageView.findViewById(R.id.chat_message_container_progress_bar).setVisibility(View.GONE);
 				break;
+			case SEND_MESSAGE:
+				Bundle bundle = msg.getData();
+				ChatActivity.this.sendMessage(bundle.getString("messagetype"), bundle.getString("messagetext"));
+				break;
 			}
 			super.handleMessage(msg);
 		}
@@ -318,7 +368,7 @@ public class ChatActivity extends ActionBarActivity {
 	}
 	
 	public void sendMessage(String messageType, String messageText) {
-		String receivers = null;
+		String receivers = "";
 		if (chatGroup.equals("")) {
 			receivers = contactId;
 		} else {
@@ -392,6 +442,92 @@ public class ChatActivity extends ActionBarActivity {
 		}
 		
 	}
+	
+	protected class VoiceRecordingButtonListener implements View.OnTouchListener {
+		protected boolean isButtonPressed = false;
+		protected float lastY = 0, initY = 0;
+		protected boolean allowShowUndoIcon = false;
+		protected boolean allowRecording = true;
+		@Override
+		public boolean onTouch(View v, MotionEvent event) {
+			switch (event.getAction()) {
+			case MotionEvent.ACTION_DOWN:
+				lastY = event.getY();
+				((ImageView)popupRecordingView.findViewById(R.id.chat_voice_recording_icon)).setImageResource(R.drawable.ic_action_microphone);
+				popupWindow.showAtLocation(popupRecordingView, Gravity.CENTER, 0, 0);
+				isButtonPressed = true;
+				allowShowUndoIcon = false;
+				allowRecording = true;
+				lastY = 0;
+				initY = event.getY();
+				startRecording();
+				break;
+			case MotionEvent.ACTION_MOVE:
+				if (isButtonPressed) {
+					if (lastY==0 && event.getY()<initY-Calculations.dip2px(ChatActivity.this, 60))
+						lastY = event.getY();
+					if (lastY==0)
+						break;
+					if (event.getY() < lastY-Calculations.dip2px(ChatActivity.this, 30)) {
+						((ImageView)popupRecordingView.findViewById(R.id.chat_voice_recording_icon)).setImageResource(R.drawable.ic_action_delete);
+						popupWindow.update();
+						allowShowUndoIcon = true;
+						lastY = event.getY();
+						allowRecording = false;
+					} else if (allowShowUndoIcon && (event.getY() > lastY+Calculations.dip2px(ChatActivity.this, 60))) {
+						((ImageView)popupRecordingView.findViewById(R.id.chat_voice_recording_icon)).setImageResource(R.drawable.ic_action_undo);
+						popupWindow.update();
+						lastY = event.getY();
+						allowRecording = true;
+					}
+				}
+				break;
+			case MotionEvent.ACTION_UP:
+				stopRecording();
+				popupWindow.dismiss();
+				isButtonPressed = false;
+				allowShowUndoIcon = false;
+				if (allowRecording)
+					asyncTask.uploadVoice(recordFile);
+				allowRecording = true;
+				((RelativeLayout)findViewById(R.id.chat_voice_layout)).setVisibility(View.GONE);
+				break;
+			}
+			return false;
+		}
+	}
+	
+	protected MediaRecorder recorder = null;
+	String recordDirectory = Storage.getStorageDirectory() + "/WeFriends/cache/audio";
+	protected boolean isRecording = false;
+	protected String recordFile = "";
+	protected void startRecording() {
+		if (! new File(recordDirectory).exists())
+			new File(recordDirectory).mkdir();
+		recordFile = recordDirectory + "/temp" + new Random().nextInt(999999) + ".amr";
+		try {
+			recorder = new MediaRecorder();
+			recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+			recorder.setOutputFormat(MediaRecorder.OutputFormat.DEFAULT);
+			recorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
+			recorder.setOutputFile(recordFile);
+			recorder.prepare();
+			recorder.start();
+			isRecording = true;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	protected void stopRecording() {
+		if (isRecording && recorder!=null) {
+			recorder.stop();
+			recorder.release();
+			recorder = null;
+		}
+		isRecording = false;
+	}
+	
 	
 }
  

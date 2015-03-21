@@ -5,6 +5,7 @@ import java.util.List;
 import jp.sharakova.android.emoji.EmojiTextView;
 
 import com.infinity.utils.OnlineImageView;
+import com.infinity.utils.Storage;
 import com.infinity.wefriends.apis.Messages;
 import com.infinity.wefriends.apis.Users;
 
@@ -92,7 +93,7 @@ public class ChatListAdapter extends BaseAdapter {
 			messageNotification.setText("99");
 		else
 			messageNotification.setText(newMsgCnt + "");
-		image.asyncLoadOnlineImage("http://" + m_context.getString(R.string.server_host) + ":" + m_context.getString(R.string.server_web_service_port) + "/" + chatInfo.getAsString("contactavatar"),Environment.getExternalStorageDirectory()+"/wefriends/cache");
+		image.asyncLoadOnlineImage("http://" + m_context.getString(R.string.server_host) + ":" + m_context.getString(R.string.server_web_service_port) + "/" + chatInfo.getAsString("contactavatar"),Storage.getStorageDirectory()+"/wefriends/cache");
 		long lastMessageTime = messagesAPI.getLastMessageTimestramp(chatInfo.getAsString("contact"), chatInfo.getAsString("chatgroup"));
 		if (lastMessageTime>0) {
 			((TextView)itemView.findViewById(R.id.contact_list_item_view_time)).setText(Messages.timestrampToString(lastMessageTime));

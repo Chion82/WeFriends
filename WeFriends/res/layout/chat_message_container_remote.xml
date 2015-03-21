@@ -27,7 +27,8 @@
 		    android:layout_width="wrap_content"
 		    android:background="@drawable/message_container_background_remote"
 		    android:orientation="vertical"
-		    android:padding="11dp" />
+		    android:padding="11dp"
+		    android:clickable="true" />
 	</LinearLayout>
 
 </LinearLayout>

@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.infinity.utils.AnimatedExpandableListView.AnimatedExpandableListAdapter;
 import com.infinity.utils.OnlineImageView;
+import com.infinity.utils.Storage;
 import com.infinity.wefriends.apis.Chats;
 import com.infinity.wefriends.apis.Messages;
 
@@ -126,7 +127,7 @@ public class ContactExpandableListAdapter extends AnimatedExpandableListAdapter 
 			boolean isLastChild, View convertView, ViewGroup parent) {
 		final ContentValues contactInfo = (ContentValues)getChild(groupPosition,childPosition);
 		View contactInfoView = inflater.inflate(R.layout.contact_list_item_view, null);
-		((OnlineImageView)contactInfoView.findViewById(R.id.contact_list_item_view_avatar)).asyncLoadOnlineImage("http://" + m_context.getString(R.string.server_host) + ":" + m_context.getString(R.string.server_web_service_port) + "/" + contactInfo.getAsString("avatar"),Environment.getExternalStorageDirectory()+"/wefriends/cache");
+		((OnlineImageView)contactInfoView.findViewById(R.id.contact_list_item_view_avatar)).asyncLoadOnlineImage("http://" + m_context.getString(R.string.server_host) + ":" + m_context.getString(R.string.server_web_service_port) + "/" + contactInfo.getAsString("avatar"),Storage.getStorageDirectory()+"/wefriends/cache");
 		((TextView)contactInfoView.findViewById(R.id.contact_list_item_view_main_title)).setText(contactInfo.getAsString("nickname"));
 		((TextView)contactInfoView.findViewById(R.id.contact_list_item_view_subtitle)).setText(contactInfo.getAsString("whatsup"));
 		int newMessageCount = contactInfo.getAsInteger("newmessagecount");

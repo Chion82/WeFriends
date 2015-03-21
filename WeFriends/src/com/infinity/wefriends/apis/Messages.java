@@ -36,6 +36,7 @@ public class Messages {
 	static final public String MESSAGE_IMAGE = "image";
 	static final public String MESSAGE_FILE  = "file";
 	static final public String MESSAGE_FRIEND_REQUEST = "friendrequest";
+	static final public String MESSAGE_VOICE = "voice";
 	
 	static final public int SUCCESS = 200;
 	static final public int FAILED = 201;

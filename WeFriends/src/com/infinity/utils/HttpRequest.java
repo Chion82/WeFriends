@@ -9,6 +9,10 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.FileEntity;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.protocol.HTTP;
@@ -77,13 +81,33 @@ public class HttpRequest {
 		return HTTP_OK;
 	}
 	
+	public static final int uploadFile(String url, String filePath, String key, String contentType, HttpRequest.Response response) {
+		HttpPost request = new HttpPost(url);
+		try {
+			DefaultHttpClient client = new DefaultHttpClient();
+			client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 60000);
+			
+			MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+			entity.addPart(key, new FileBody(new File(filePath)));
+			request.setEntity(entity);
+			
+			HttpResponse httpResponse = client.execute(request);
+			if (httpResponse.getStatusLine().getStatusCode() != 200)
+				return HTTP_FAILED;
+			response.setString(EntityUtils.toString(httpResponse.getEntity()));
+		} catch (Exception e) {
+			Log.e("WeFriends",e.getMessage());
+			return HTTP_FAILED;
+		}
+		return HTTP_OK;
+	}
+	
 	public static final int downloadFile(String url,String filePath) {
 		HttpGet request = new HttpGet(url);
 		
 		try {
 			DefaultHttpClient client = new DefaultHttpClient();
 			client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 60000);
-			client.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, 60000);
 			
 			HttpResponse httpResponse = client.execute(request);
 			if (httpResponse.getStatusLine().getStatusCode() != 200)
