@@ -49,6 +49,9 @@ public class VoiceMessageView extends LinearLayout {
 		String[] urlArray = m_voiceFile.split("/");
 		String fileName = urlArray[urlArray.length-1];
 		localFilePath = Storage.getStorageDirectory() + "/WeFriends/cache/audio/" + fileName;
+		File directory = new File(Storage.getStorageDirectory() + "/WeFriends/cache/audio");
+		if (!directory.exists())
+			directory.mkdir();
 		if (fromRemote) {
 			LayoutInflater.from(m_context).inflate(R.layout.chat_message_voice_view_remote, this);
 		} else {
