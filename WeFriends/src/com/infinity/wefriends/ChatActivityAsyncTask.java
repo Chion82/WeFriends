@@ -54,6 +54,14 @@ public class ChatActivityAsyncTask {
 				if (chatActivity.messagesAPI.sendMessage(message)==Messages.SUCCESS) {
 					msg.what = ChatActivity.MESSAGE_SENDING_FINISHED;
 					chatActivity.handler.sendMessage(msg);
+					ContentValues chatInfo = new ContentValues();
+					chatInfo.put("contact", chatActivity.contactId);
+					chatInfo.put("chatgroup", chatActivity.chatGroup);
+					chatInfo.put("contactnickname", chatActivity.contactNickname);
+					chatInfo.put("contactavatar", chatActivity.contactAvatar);
+					chatInfo.put("chattype", message.getAsString("messagetype"));
+					chatInfo.put("addtime", message.getAsLong("timestramp"));
+					chatActivity.chatsAPI.addChat(chatInfo);
 				} else {
 					msg.what = ChatActivity.MESSAGE_SENDING_FAILED;
 					chatActivity.handler.sendMessage(msg);

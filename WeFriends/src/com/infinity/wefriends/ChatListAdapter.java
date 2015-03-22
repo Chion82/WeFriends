@@ -76,6 +76,8 @@ public class ChatListAdapter extends BaseAdapter {
 				mainTitle.setText(chatInfo.getAsString("contactnickname"));
 				if (chatInfo.getAsString("chattype").equals(Messages.MESSAGE_TEXT))
 					subtitle.setEmojiText(messagesAPI.getLastMessageFrom(chatInfo.getAsString("contact"), chatInfo.getAsString("chatgroup")).replaceAll("<.*?>", " "));
+				else if (chatInfo.getAsString("chattype").equals(Messages.MESSAGE_VOICE))
+					subtitle.setText(m_context.getString(R.string.message_audio));
 			} else {
 				mainTitle.setText(chatInfo.getAsString("chatgroup"));
 				if (!chatInfo.getAsString("contact").equals("")) {

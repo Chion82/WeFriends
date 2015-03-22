@@ -14,6 +14,7 @@ import com.infinity.utils.Calculations;
 import com.infinity.utils.OnlineImageView;
 import com.infinity.utils.Storage;
 import com.infinity.utils.WrapViewGroup;
+import com.infinity.wefriends.apis.Chats;
 import com.infinity.wefriends.apis.Messages;
 import com.infinity.wefriends.apis.Users;
 import com.nineoldandroids.animation.ObjectAnimator;
@@ -63,8 +64,8 @@ public class ChatActivity extends ActionBarActivity {
 	static final public int SEND_MESSAGE = 105;
 	
 	public String contactId = "";
-	protected String contactNickname = "";
-	protected String contactAvatar = "";
+	public String contactNickname = "";
+	public String contactAvatar = "";
 	public String chatGroup = "";
 	protected String userId = "";
 	protected String userNickname = "";
@@ -72,6 +73,7 @@ public class ChatActivity extends ActionBarActivity {
 	
 	protected Users usersAPI = null;
 	public Messages messagesAPI = null;
+	public Chats chatsAPI = null;
 	protected ContentValues userInfo = null;
 	protected ChatActivityAsyncTask asyncTask = null;
 	
@@ -123,6 +125,7 @@ public class ChatActivity extends ActionBarActivity {
 		
 		usersAPI = new Users(this);
 		messagesAPI = new Messages(this);
+		chatsAPI = new Chats(this);
 		asyncTask = new ChatActivityAsyncTask(this);
 		
 		userInfo = usersAPI.getCachedUserInfo();

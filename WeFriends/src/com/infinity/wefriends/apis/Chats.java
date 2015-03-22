@@ -100,7 +100,7 @@ public class Chats {
 			chatInfo.put("contactnickname", messageInfo.getAsString("sendernickname"));
 			chatInfo.put("contactavatar", messageInfo.getAsString("senderavatar"));
 			chatInfo.put("chattype", messageInfo.getAsString("messagetype"));
-			chatInfo.put("addtime", messageInfo.getAsString("timestramp"));
+			chatInfo.put("addtime", messageInfo.getAsLong("timestramp"));
 			addChat(chatInfo);
 			//Log.d("test","chatgroup=" + messageInfo.getAsString("chatgroup") + ";contactnickmane=" + messageInfo.getAsString("sendernickname"));
 		}
