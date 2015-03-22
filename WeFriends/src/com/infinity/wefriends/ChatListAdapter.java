@@ -86,6 +86,8 @@ public class ChatListAdapter extends BaseAdapter {
 				}
 			}
 		}
+		subtitle.setText(subtitle.getText().toString().replaceAll("^static/upload.*?\\.amr$", m_context.getString(R.string.message_audio)));
+		subtitle.setText(subtitle.getText().toString().replaceAll("^static/upload.*?\\.(jpg|png|gif|jpeg)$", m_context.getString(R.string.message_audio)));
 		int newMsgCnt = messagesAPI.getNonHandledMessageCountWith(chatInfo.getAsString("contact"),chatInfo.getAsString("chatgroup"));
 		if (newMsgCnt>0)
 			messageNotification.setVisibility(View.VISIBLE);

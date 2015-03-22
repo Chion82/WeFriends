@@ -35,5 +35,8 @@
     <string name="delete_chat">删除</string>
     <string name="pin_to_top">置顶</string>
     <string name="loading">Loading...</string>
+    
+    <string name="message_audio">[语音]</string>
+    <string name="message_image">[图片]</string>
 
 </resources>
